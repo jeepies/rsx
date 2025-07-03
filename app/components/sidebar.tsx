@@ -44,7 +44,7 @@ export default function DashboardSidebar() {
           <NavLink
             to={item.url}
             className={`transition-smooth hover:bg-muted/50 ${isSubItem ? 'pl-8' : ''}`}
-            style={({ isActive }) => ({
+            style={() => ({
               backgroundColor: 'transparent',
               color: 'inherit',
             })}
