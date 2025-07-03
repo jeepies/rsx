@@ -20,9 +20,9 @@ import { Button } from '~/components/ui/button';
 import { NavLink } from '@remix-run/react';
 
 const mainNavItems = [
-  { title: 'Home', url: '/', icon: Home },
-  { title: 'Player Search', url: '/search', icon: Search },
-  { title: 'Leaderboards', url: '/leaderboards', icon: BarChart3 },
+  { title: 'Home', url: '/dashboard/index', icon: Home },
+  { title: 'Player Search', url: '/dashboard/search', icon: Search },
+  { title: 'Leaderboards', url: '/dashboard/leaderboards', icon: BarChart3 },
 ];
 
 export default function DashboardSidebar() {
