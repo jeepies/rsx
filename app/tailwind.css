@@ -4,52 +4,6 @@
 
 @layer base {
   :root {
-    --background: 240 10% 8%;
-    --foreground: 210 40% 98%;
-
-    --card: 240 10% 10%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 240 10% 10%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 253 52% 80%;
-    --primary-foreground: 240 10% 8%;
-
-    --secondary: 240 10% 12%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 240 10% 12%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 253 52% 80%;
-    --accent-foreground: 240 10% 8%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 240 10% 18%;
-    --input: 240 10% 18%;
-    --ring: 253 52% 80%;
-
-    --sidebar-background: 240 10% 6%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 253 52% 80%;
-    --sidebar-primary-foreground: 240 10% 8%;
-    --sidebar-accent: 240 3.7% 12%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 253 52% 80%;
-
-    --nexus-primary: 253 52% 80%;
-    --nexus-secondary: 240 5% 12%;
-    --nexus-dark: 240 10% 6%;
-    --nexus-light: 240 10% 95%;
-
-    --radius: 0.75rem;
-  }
-
-  .light {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -86,6 +40,52 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 253 52% 80%;
+
+    --nexus-primary: 253 52% 80%;
+    --nexus-secondary: 240 5% 12%;
+    --nexus-dark: 240 10% 6%;
+    --nexus-light: 240 10% 95%;
+
+    --radius: 0.75rem;
+  }
+
+  body.dark {
+    --background: 240 10% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 240 10% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 240 10% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 253 52% 80%;
+    --primary-foreground: 240 10% 8%;
+
+    --secondary: 240 10% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 240 10% 12%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 253 52% 80%;
+    --accent-foreground: 240 10% 8%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 253 52% 80%;
+
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 253 52% 80%;
+    --sidebar-primary-foreground: 240 10% 8%;
+    --sidebar-accent: 240 3.7% 12%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 253 52% 80%;
   }
 }
 
@@ -100,6 +100,10 @@
   }
 
   html {
+    color-scheme: light dark;
+  }
+
+  body.dark {
     color-scheme: dark;
   }
 }
