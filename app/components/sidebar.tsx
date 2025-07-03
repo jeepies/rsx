@@ -76,7 +76,7 @@ export default function DashboardSidebar() {
                     {selectedLanguage}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className='space-y-2'>
                   <DropdownMenuItem>English</DropdownMenuItem>
                   <DropdownMenuItem>Español</DropdownMenuItem>
                   <DropdownMenuItem>Français</DropdownMenuItem>
