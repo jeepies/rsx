@@ -1,11 +1,10 @@
-import { Globe } from 'lucide-react';
+import { BarChart3, Globe, Home, ListTodo, Search } from 'lucide-react';
 import { useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -18,11 +17,45 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Button } from '~/components/ui/button';
+import { NavLink } from '@remix-run/react';
+
+const mainNavItems = [
+  { title: 'Home', url: '/', icon: Home },
+  { title: 'Player Search', url: '/search', icon: Search },
+  { title: 'Leaderboards', url: '/leaderboards', icon: BarChart3 },
+];
 
 export default function DashboardSidebar() {
   const { state } = useSidebar();
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
+
+  const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
+    const IconComponent =
+      typeof item.icon === 'string'
+        ? item.icon === 'list-todo'
+          ? ListTodo
+          : item.icon
+        : item.icon;
+
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <NavLink
+            to={item.url}
+            className={`transition-smooth hover:bg-muted/50 ${isSubItem ? 'pl-8' : ''}`}
+            style={({ isActive }) => ({
+              backgroundColor: 'transparent',
+              color: 'inherit',
+            })}
+          >
+            <IconComponent className="mr-2 h-4 w-4" />
+            {!collapsed && <span>{item.title}</span>}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar>
@@ -53,6 +86,16 @@ export default function DashboardSidebar() {
             )}
           </div>
         </div>
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNavItems.map((item) => (
+                <NavItem key={item.title} item={item} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
