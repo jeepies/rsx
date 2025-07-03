@@ -21,4 +21,7 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  server: {
+    allowedHosts: ["supreme-humpback-luckily.ngrok-free.app"]
+  }
 });
