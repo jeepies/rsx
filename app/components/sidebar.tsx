@@ -1,4 +1,4 @@
-import { BarChart3, Globe, Home, ListTodo, Search } from 'lucide-react';
+import { BarChart3, BookUser, Globe, Home, ListTodo } from 'lucide-react';
 import { useState } from 'react';
 import {
   Sidebar,
@@ -21,7 +21,7 @@ import { NavLink } from '@remix-run/react';
 
 const mainNavItems = [
   { title: 'Home', url: '/dashboard/index', icon: Home },
-  { title: 'Player Search', url: '/dashboard/search', icon: Search },
+  { title: 'Players', url: '/dashboard/players', icon: BookUser },
   { title: 'Leaderboards', url: '/dashboard/leaderboards', icon: BarChart3 },
 ];
 
