@@ -87,7 +87,6 @@ export function transformPlayerData(raw: RawPlayerData): TransformedPlayerData {
   for (const skill of raw.skillvalues) {
     const skillName = skillIdToNameMap[skill.id];
     if (!skillName) {
-      console.warn(`Unknown skill ID ${skill.id}, skipping`);
       continue;
     }
     skills[skillName] = {
