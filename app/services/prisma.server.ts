@@ -1,29 +1,63 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, SkillName } from '@prisma/client';
+import { TransformedPlayerData } from './transformers/player.server';
 
 const prismaBase = new PrismaClient();
 
 const extendedClient = prismaBase.$extends({
   model: {
     player: {
-      async updateData(data: Prisma.InputJsonValue, where: { rsn: string }) {
-        const currentData = await extendedClient.player.findUnique({ where: where });
-        if (!currentData)
-          throw new Error("currentData was null. cant update data that doesn't exist");
-        const snapshot = await extendedClient.playerSnapshot.create({
-          data: {
-            playerId: currentData.id,
-            timestamp: currentData.lastFetched,
-            data: currentData.data as Prisma.InputJsonValue,
+      async updateData(data: TransformedPlayerData, where: Prisma.PlayerWhereUniqueInput) {
+        const current = await extendedClient.player.findUnique({
+          where,
+          include: {
+            snapshots: {
+              orderBy: { timestamp: 'desc' },
+              take: 1,
+              include: {
+                skills: true,
+                activities: true,
+              },
+            },
           },
         });
-        console.log("3")
-        if (!snapshot) throw new Error('failed to create snapshot. wont update.');
-        return prismaBase.player.update({
+
+        if (!current) throw new Error("Player not found. Can't update data.");
+
+        await extendedClient.playerSnapshot.create({
           data: {
-            data: data,
-            lastFetched: new Date(),
+            playerId: current.id,
+            timestamp: new Date(),
+
+            rank: data.rank,
+            totalXp: data.totalXp,
+            totalSkill: data.totalSkill,
+            combatLevel: data.combatLevel,
+            loggedIn: data.loggedIn,
+
+            skills: {
+              create: Object.entries(data.skills).map(([name, skill]) => ({
+                name: name as SkillName,
+                xp: BigInt(skill.xp),
+                rank: skill.rank,
+                level: skill.level,
+              })),
+            },
+
+            activities: {
+              create: data.activities.map((activity) => ({
+                date: new Date(activity.date),
+                text: activity.text,
+                details: activity.details,
+              })),
+            },
           },
-          where: where,
+        });
+
+        return prismaBase.player.update({
+          where,
+          data: {
+            lastFetchedAt: new Date(),
+          },
         });
       },
     },

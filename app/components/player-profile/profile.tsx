@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, TrendingUp } from 'lucide-react';
 import { RuneMetricsProfileFormatted, SkillData } from '~/services/runescape.server';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
@@ -22,41 +22,61 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { Progress } from "~/components/ui/progress";
+import { Progress } from '~/components/ui/progress';
+import { formatBigInt } from '~/lib/utils';
 
-interface ProfileProps {
+export interface ProfileProps {
   data: {
     player: {
       id: string;
       rsn: string;
-      data: RuneMetricsProfileFormatted;
+      data: {
+        username: string;
+        rank: number;
+        totalXp: number;
+        totalSkill: number;
+        combatLevel: number;
+        loggedIn: boolean;
+        skills: Record<string, { xp: number; level: number; rank: number }>;
+        activities: any[];
+      };
       lastFetched: Date;
       createdAt: Date;
       updatedAt: Date;
+      dailyXpIncreases: Record<string, number>;
+      dailyLevelIncreases: Record<string, number>;
+      dailyRankIncrease: number;
+      weeklyXp: {
+        date: string;
+        dailyXP: number;
+      }[];
     };
     chatHead: string;
-    minutesSince: number;
-    xpSinceYesterday: number | Record<string, SkillData>;
   };
 }
 
 export default function PlayerProfile(props: Readonly<ProfileProps>) {
-  const fetcher = useFetcher();
   const {
-    data: { player, chatHead, minutesSince },
+    data: { player, chatHead },
   } = props;
-  const skillsData = Object.entries(player.data.formattedSkills).map(([skill, data]) => ({
-    skill,
-    level: data.level > 99 ? 99 : data.level,
-    xp: data.xp,
-    virtual: data.level,
-    levelsToday: 0,
-    xpToday: 0,
-  }));
+  const skillsData = Object.entries(player.data.skills).map(([skill, data]) => {
+    const skillKey = skill.toLowerCase();
 
-  const now = new Date();
-  const then = now.setTime(now.getMinutes() - minutesSince);
-  const canRefresh = minutesSince > 5;
+    const levelsTodayForSkill = player.dailyLevelIncreases?.[skillKey] ?? 0;
+    const xpTodayForSkill = player.dailyXpIncreases?.[skillKey] ?? 0;
+
+    return {
+      skill,
+      level: data.level > 99 ? 99 : data.level,
+      xp: data.xp,
+      virtual: data.level,
+      levelsTodayForSkill,
+      xpTodayForSkill,
+    };
+  });
+
+  const levelsToday = Object.values(player.dailyLevelIncreases).reduce((a, b) => a + b, 0);
+  const xpToday = Object.values(player.dailyXpIncreases).reduce((a, b) => a + b, 0);
 
   // sample quest data. TODO: fill this with real data
   const questData = [
@@ -76,11 +96,11 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <Avatar>
                   <AvatarImage className="p-2" src={chatHead} />
-                  <AvatarFallback>{player.data.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{player.data.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-3xl font-bold truncate">{player.data.name}</h1>
+                <h1 className="text-xl sm:text-3xl font-bold truncate">{player.data.username}</h1>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                   <Badge
                     variant="default"
@@ -92,7 +112,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
+              {/* <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
                 <Tooltip>
                   <TooltipTrigger>
                     <Button
@@ -114,8 +134,8 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                     </p>
                   </TooltipContent>
                 </Tooltip>
-              </fetcher.Form>
-              <FavouriteProfileButton RSN={player.data.name} />
+              </fetcher.Form> */}
+              <FavouriteProfileButton RSN={player.data.username} />
             </div>
           </div>
         </CardHeader>
@@ -135,7 +155,43 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-          ...
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                Daily XP Progress
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Daily experience gained over the last 7 days
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={player.weeklyXp}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="date" stroke="#9CA3AF" />
+                  <YAxis
+                    stroke="#9CA3AF"
+                    tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    formatter={(value) => [
+                      `${(Number(value) / 1000000).toFixed(1)}M XP`,
+                      'Daily XP',
+                    ]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="dailyXP"
+                    stroke="#a29bfe"
+                    strokeWidth={3}
+                    dot={{ fill: '#a29bfe' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-4 sm:space-y-6">
@@ -144,7 +200,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{props.data.player.data.totalskill}</div>
+                  <div className="text-2xl font-bold">{props.data.player.data.totalSkill}</div>
                   <div className="text-sm text-muted-foreground">Total Level</div>
                 </div>
               </CardContent>
@@ -152,7 +208,9 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{props.data.player.data.totalxp}</div>
+                  <div className="text-2xl font-bold">
+                    {formatBigInt(props.data.player.data.totalXp)}
+                  </div>
                   <div className="text-sm text-muted-foreground">Total XP</div>
                 </div>
               </CardContent>
@@ -160,7 +218,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">0</div>
+                  <div className="text-2xl font-bold text-primary">{levelsToday}</div>
                   <div className="text-sm text-muted-foreground">Levels Today</div>
                 </div>
               </CardContent>
@@ -168,7 +226,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-400">0</div>
+                  <div className="text-2xl font-bold text-green-400">{formatBigInt(xpToday)}</div>
                   <div className="text-sm text-muted-foreground">XP Today</div>
                 </div>
               </CardContent>
@@ -177,7 +235,9 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Skill Details</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                Skill Details
+              </CardTitle>
               <CardDescription>
                 Detailed breakdown of all skill levels and experience
               </CardDescription>
@@ -195,44 +255,34 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {skillsData.map((skill) => {
-                    let xpSinceYesterdayRecord: SkillData = { xp: 0, level: 0, rank: 0 };
-                    if (
-                      typeof props.data.xpSinceYesterday === 'object' &&
-                      props.data.xpSinceYesterday !== null
-                    ) {
-                      xpSinceYesterdayRecord = props.data.xpSinceYesterday[skill.skill] ?? {};
-                    }
-
-                    return (
-                      <TableRow key={skill.skill}>
-                        <TableCell className="font-medium">{skill.skill}</TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant="secondary">{skill.level}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">{skill.virtual}</TableCell>
-                        <TableCell className="text-right">{skill.xp.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">
-                          {xpSinceYesterdayRecord.level > 0 ? (
-                            <Badge variant="default" className="bg-green-500">
-                              {xpSinceYesterdayRecord.level}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">0</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {xpSinceYesterdayRecord.xp > 0 ? (
-                            <span className="text-green-400 font-medium">
-                              +{xpSinceYesterdayRecord.xp}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">0</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {skillsData.map((skill) => (
+                    <TableRow key={skill.skill}>
+                      <TableCell className="font-medium">{skill.skill}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="secondary">{skill.level}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{skill.virtual}</TableCell>
+                      <TableCell className="text-right">{formatBigInt(skill.xp)}</TableCell>
+                      <TableCell className="text-right">
+                        {skill.levelsTodayForSkill > 0 ? (
+                          <Badge variant="default" className="bg-green-500">
+                            {skill.levelsTodayForSkill}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {skill.xpTodayForSkill > 0 ? (
+                          <span className="text-green-400 font-medium">
+                            +{skill.xpTodayForSkill}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -267,7 +317,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 sm:space-y-4">
-                  {questData.map((category, index) => (
+                  {questData.map((category) => (
                     <div key={category.category} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>{category.category}</span>
