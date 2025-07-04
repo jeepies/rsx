@@ -98,20 +98,21 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <Avatar>
-                  <AvatarImage className="p-2" src={chatHead} />
-                  <AvatarFallback>{player.data.username.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </div>
+              <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
+                <AvatarImage
+                  src={`https://secure.runescape.com/m=avatar-rs/${player.rsn?.toLowerCase()}/chat.png`}
+                  alt={`${player.data.username}'s avatar`}
+                />
+                <AvatarFallback className="w-16 h-16 sm:w-20 sm:h-20 bg-primary text-xl sm:text-2xl font-bold text-primary-foreground">
+                  {player.data.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl sm:text-3xl font-bold truncate">{player.data.username}</h1>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                  <Badge
-                    variant="default"
-                    className={`${player.data.loggedIn ? `bg-green-500` : `bg-red-500`} text-xs sm:text-sm`}
-                  >
-                    {player.data.loggedIn ? 'Online' : 'Offline'}
+                  <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Online
                   </Badge>
                 </div>
               </div>

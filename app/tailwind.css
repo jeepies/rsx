@@ -102,7 +102,7 @@
   html {
     color-scheme: light dark;
   }
-
+  
   body.dark {
     color-scheme: dark;
   }
@@ -179,7 +179,7 @@
   .sidebar-hidden {
     transform: translateX(-100%);
   }
-
+  
   .sidebar-overlay {
     position: fixed;
     inset: 0;
