@@ -4,6 +4,10 @@ import { prisma } from '../prisma.server';
 import redis from '../redis.server';
 import { TransformedPlayerData, transformPlayerData } from '../transformers/player.server';
 import { RunescapeAPI } from '~/services/runescape.server';
+import { getWithinTimePeriod } from './snapshot.server';
+
+// i sure fucking hope this doesn't change ever....
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 interface CachedPlayerData extends TransformedPlayerData {
   fetchedAt: number;
@@ -198,4 +202,75 @@ export async function getFreshestData(rsn: string) {
       activities: [],
     };
   }
+}
+
+export async function getDailyXpIncreases(rsn: string) {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - ONE_DAY_MS);
+
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: oneDayAgo,
+    to: now,
+    order: 'asc',
+  });
+
+  if (snapshots.length < 2) return {};
+
+  const first = snapshots[0];
+  const last = snapshots[snapshots.length - 1];
+
+  const firstSkills = Object.fromEntries(first.skills.map((s) => [s.name, s.xp]));
+  const lastSkills = Object.fromEntries(last.skills.map((s) => [s.name, s.xp]));
+
+  const xpIncreases: Record<string, number> = {};
+  for (const skillName in lastSkills) {
+    xpIncreases[skillName] = Number(lastSkills[skillName] - (firstSkills[skillName] ?? 0));
+  }
+  return xpIncreases;
+}
+
+export async function getDailyLevelIncreases(rsn: string) {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - ONE_DAY_MS);
+
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: oneDayAgo,
+    to: now,
+    order: 'asc',
+  });
+
+  if (snapshots.length < 2) return {};
+
+  const first = snapshots[0];
+  const last = snapshots[snapshots.length - 1];
+
+  const firstSkills = Object.fromEntries(first.skills.map((s) => [s.name, s.level]));
+  const lastSkills = Object.fromEntries(last.skills.map((s) => [s.name, s.level]));
+
+  const levelIncreases: Record<string, number> = {};
+  for (const skillName in lastSkills) {
+    levelIncreases[skillName] = Number(lastSkills[skillName] - (firstSkills[skillName] ?? 0));
+  }
+  return levelIncreases;
+}
+
+export async function getDailyRankIncrease(rsn: string): Promise<number> {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - ONE_DAY_MS);
+
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: oneDayAgo,
+    to: now,
+    order: 'asc',
+  });
+
+  if (snapshots.length < 2) return 0;
+
+  const first = snapshots[0];
+  const last = snapshots[snapshots.length - 1];
+
+  return last.rank - first.rank;
 }
