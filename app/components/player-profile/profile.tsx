@@ -1,7 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { RefreshCw, TrendingUp } from 'lucide-react';
-import { RuneMetricsProfileFormatted, SkillData } from '~/services/runescape.server';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table';
@@ -50,12 +49,14 @@ export interface ProfileProps {
         date: string;
         dailyXP: number;
       }[];
+      refreshTimestamp: number;
     };
     chatHead: string;
   };
 }
 
 export default function PlayerProfile(props: Readonly<ProfileProps>) {
+  const fetcher = useFetcher();
   const {
     data: { player, chatHead },
   } = props;
@@ -77,6 +78,10 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
 
   const levelsToday = Object.values(player.dailyLevelIncreases).reduce((a, b) => a + b, 0);
   const xpToday = Object.values(player.dailyXpIncreases).reduce((a, b) => a + b, 0);
+
+  const now = new Date();
+  const refreshTimestampDate = new Date(props.data.player.refreshTimestamp);
+  const canRefresh = refreshTimestampDate < now;
 
   // sample quest data. TODO: fill this with real data
   const questData = [
@@ -112,7 +117,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              {/* <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
+              <fetcher.Form method="get" action={`/api/refresh/${player.data.username}`}>
                 <Tooltip>
                   <TooltipTrigger>
                     <Button
@@ -130,11 +135,11 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                     <p>
                       {canRefresh
                         ? 'Refresh this users data'
-                        : formatDistance(now, then, { includeSeconds: true })}
+                        : formatDistance(now, refreshTimestampDate, { includeSeconds: true })}
                     </p>
                   </TooltipContent>
                 </Tooltip>
-              </fetcher.Form> */}
+              </fetcher.Form>
               <FavouriteProfileButton RSN={player.data.username} />
             </div>
           </div>

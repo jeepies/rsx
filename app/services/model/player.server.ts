@@ -32,6 +32,11 @@ export async function canRefresh(rsn: string): Promise<boolean> {
   return !isLocked;
 }
 
+export async function getRefreshTimestamp(rsn: string) {
+  const timestamp = await redis.expireTime(getRedisKey(rsn));
+  return timestamp;
+}
+
 /**
  * Commit a lock to redis
  * @param rsn Runescape Name
