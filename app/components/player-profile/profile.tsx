@@ -213,7 +213,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                           <Badge variant="secondary">{skill.level}</Badge>
                         </TableCell>
                         <TableCell className="text-right">{skill.virtual}</TableCell>
-                        <TableCell className="text-right">{skill.xp.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{skill.xp.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</TableCell>
                         <TableCell className="text-right">
                           {xpSinceYesterdayRecord.level > 0 ? (
                             <Badge variant="default" className="bg-green-500">

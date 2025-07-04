@@ -28,7 +28,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response('Player not found', { status: 404 });
   }
 
-  if (!playerData) throw new Response('Player data not found', { status: 404 });
+  if (!playerData) throw new Response('Player not found', { status: 404 });
 
   const playerMeta = await prisma.player.findUnique({
     where: { username: rsn },
@@ -82,6 +82,8 @@ export default function PlayerPage() {
     return <PlayerProfileSkeleton key={`skeleton-${rsnKey}`} />;
   }
 
+  
+
   if (!data) {
     return <PlayerNotFound RSN={params.rsn || ''} />;
   }
@@ -91,6 +93,8 @@ export default function PlayerPage() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+
+  console.log(error);
 
   if (isRouteErrorResponse(error)) {
     if (error.status === 404) {

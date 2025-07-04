@@ -56,9 +56,17 @@ export async function getFreshestData(rsn: string) {
     }
   }
 
+  const playerRow = await prisma.player.upsert({
+    where: { username: rsn },
+    update: {},
+    create: {
+      username: rsn,
+      lastFetchedAt: new Date(),
+    },
+  });
+
   if (await canRefresh(rsn)) {
     await commitLock(rsn);
-
     try {
       const rawProfile = await RunescapeAPI.fetchRuneMetricsProfile(rsn);
 
@@ -79,24 +87,13 @@ export async function getFreshestData(rsn: string) {
 
       const transformedData = transformPlayerData(rawData);
 
-      // upsert player, but the long way.
-      let player = await prisma.player.findUnique({ where: { username: rsn } });
-      if (!player) {
-        player = await prisma.player.create({
-          data: {
-            username: rsn,
-            lastFetchedAt: new Date(),
-          },
-        });
-      }
-
       // create a snapshot of this moment
       await prisma.playerSnapshot.create({
         data: {
-          playerId: player.id,
+          playerId: playerRow.id,
           timestamp: new Date(),
           rank: transformedData.rank,
-          totalXp: transformedData.totalXp, // do not know how to serialize a bigint
+          totalXp: transformedData.totalXp,
           totalSkill: transformedData.totalSkill,
           combatLevel: transformedData.combatLevel,
           loggedIn: transformedData.loggedIn,
@@ -120,21 +117,26 @@ export async function getFreshestData(rsn: string) {
 
       // update the lastFetchedAt date
       await prisma.player.update({
-        where: { id: player.id },
+        where: { id: playerRow.id },
         data: { lastFetchedAt: new Date() },
       });
 
       // cache it please
-      await redis.set(cacheKey, JSON.stringify({ ...transformedData, fetchedAt: Date.now() }, bigintReplacer), {
-        EX: config.TIMINGS.AUTO_REFRESH,
-      });
+      await redis.set(
+        cacheKey,
+        JSON.stringify({ ...transformedData, fetchedAt: Date.now() }, bigintReplacer),
+        {
+          EX: config.TIMINGS.AUTO_REFRESH,
+        },
+      );
+
       return transformedData;
     } catch (error) {
       console.error(`Fetch failed for ${rsn}:`, error);
       // lets just get the stale old db record :(
     }
 
-    const player = await prisma.player.findUnique({
+    const playerWithSnapshots = await prisma.player.findUnique({
       where: { username: rsn },
       include: {
         snapshots: {
@@ -149,10 +151,12 @@ export async function getFreshestData(rsn: string) {
     });
 
     // i had to cover my eyes writing this
-    if (player?.snapshots?.[0]) {
-      const latest = player.snapshots[0];
+    if (playerWithSnapshots?.snapshots?.length) {
+      const latest = playerWithSnapshots.snapshots[0];
+      const removeLastDigit = (num: number | bigint) => Math.floor(Number(num) / 10);
+
       return {
-        username: player.username,
+        username: playerWithSnapshots.username,
         rank: latest.rank,
         totalXp: latest.totalXp,
         totalSkill: latest.totalSkill,
@@ -161,9 +165,9 @@ export async function getFreshestData(rsn: string) {
         skills: latest.skills.reduce(
           (acc, skill) => {
             acc[skill.name] = {
-              xp: Number(skill.xp),
-              level: Number(skill.level),
-              rank: Number(skill.rank),
+              xp: removeLastDigit(skill.xp),
+              level: removeLastDigit(skill.level),
+              rank: removeLastDigit(skill.rank),
             };
             return acc;
           },
@@ -178,12 +182,8 @@ export async function getFreshestData(rsn: string) {
     }
 
     // achievement got: how did we end up here
-    const created = await prisma.player.create({
-      data: { username: rsn },
-    });
-
     return {
-      username: created.username,
+      username: playerRow.username,
       rank: 0,
       totalXp: 0,
       totalSkill: 0,
