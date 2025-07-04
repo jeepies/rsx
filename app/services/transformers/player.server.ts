@@ -89,9 +89,10 @@ export function transformPlayerData(raw: RawPlayerData): TransformedPlayerData {
     if (!skillName) {
       continue;
     }
+    const xpWithoutLastDigit = Math.floor(skill.xp / 10);
     skills[skillName] = {
       level: skill.level,
-      xp: BigInt(skill.xp),
+      xp: BigInt(xpWithoutLastDigit),
       rank: skill.rank,
     };
   }
@@ -107,6 +108,7 @@ export function transformPlayerData(raw: RawPlayerData): TransformedPlayerData {
       details,
     };
   });
+
 
   return {
     username: raw.name,
