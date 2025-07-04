@@ -13,7 +13,12 @@ import { RunescapeAPI } from '~/services/runescape.server';
 import PlayerNotFound from '~/components/player-profile/not-found';
 import PlayerProfile from '~/components/player-profile/profile';
 import { sanitizeBigInts, sleep } from '~/lib/utils';
-import { getFreshestData } from '~/services/model/player.server';
+import {
+  getDailyLevelIncreases,
+  getDailyRankIncrease,
+  getDailyXpIncreases,
+  getFreshestData,
+} from '~/services/model/player.server';
 import { prisma } from '~/services/prisma.server';
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -24,7 +29,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   let playerData;
   try {
     playerData = await getFreshestData(rsn);
-  } catch(e) {
+  } catch (e) {
     throw new Response('Player not found', { status: 404 });
   }
 
@@ -37,6 +42,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!playerMeta) {
     throw new Response('Player not found', { status: 404 });
   }
+
+  const [dailyXpIncreases, dailyLevelIncreases, dailyRankIncrease] = await Promise.all([
+    getDailyXpIncreases(rsn),
+    getDailyLevelIncreases(rsn),
+    getDailyRankIncrease(rsn),
+  ]);
 
   const elapsed = Date.now() - start;
   if (elapsed < config.TIMINGS.MIN_SKELETON_TIME) {
@@ -54,6 +65,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
       lastFetched: sanitizedPlayerMeta.lastFetchedAt,
       createdAt: sanitizedPlayerMeta.createdAt,
       updatedAt: sanitizedPlayerMeta.updatedAt,
+      dailyXpIncreases,
+      dailyLevelIncreases,
+      dailyRankIncrease,
     },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),
   };
@@ -81,8 +95,6 @@ export default function PlayerPage() {
   ) {
     return <PlayerProfileSkeleton key={`skeleton-${rsnKey}`} />;
   }
-
-  
 
   if (!data) {
     return <PlayerNotFound RSN={params.rsn || ''} />;

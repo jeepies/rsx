@@ -43,6 +43,9 @@ export interface ProfileProps {
       lastFetched: Date;
       createdAt: Date;
       updatedAt: Date;
+      dailyXpIncreases: Record<string, number>;
+      dailyLevelIncreases: Record<string, number>;
+      dailyRankIncrease: number;
     };
     chatHead: string;
   };
@@ -57,9 +60,12 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
     level: data.level > 99 ? 99 : data.level,
     xp: data.xp,
     virtual: data.level,
-    levelsToday: 0,
-    xpToday: 0,
+    // levelsToday: player.dailyLevelIncreases?.[skill.toLowerCase()] ?? 0,
+    // xpToday: player.dailyXpIncreases?.[skill.toLowerCase()] ?? 0,
   }));
+
+  const levelsToday = Object.values(player.dailyLevelIncreases).reduce((a, b) => a + b, 0);
+  const xpToday = Object.values(player.dailyXpIncreases).reduce((a, b) => a + b, 0);
 
   // sample quest data. TODO: fill this with real data
   const questData = [
@@ -155,7 +161,9 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{formatBigInt(props.data.player.data.totalXp)}</div>
+                  <div className="text-2xl font-bold">
+                    {formatBigInt(props.data.player.data.totalXp)}
+                  </div>
                   <div className="text-sm text-muted-foreground">Total XP</div>
                 </div>
               </CardContent>
@@ -163,7 +171,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">0</div>
+                  <div className="text-2xl font-bold text-primary">{levelsToday}</div>
                   <div className="text-sm text-muted-foreground">Levels Today</div>
                 </div>
               </CardContent>
@@ -171,7 +179,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-400">0</div>
+                  <div className="text-2xl font-bold text-green-400">{formatBigInt(xpToday)}</div>
                   <div className="text-sm text-muted-foreground">XP Today</div>
                 </div>
               </CardContent>
