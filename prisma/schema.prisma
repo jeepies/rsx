@@ -8,11 +8,25 @@ datasource db {
 }
 
 model Player {
-  id          String   @id @default(cuid())
-  rsn         String   @unique
+  id          String           @id @default(cuid())
+  rsn         String           @unique
   data        Json // this is lazy, and is a for-now approach.
   lastFetched DateTime
+  snapshots   PlayerSnapshot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model PlayerSnapshot {
+  id        Int      @id @default(autoincrement())
+  playerId  String
+  timestamp DateTime @default(now())
+
+  data Json // another laziness
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@index([playerId, timestamp])
+}
+

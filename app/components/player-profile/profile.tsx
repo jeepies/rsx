@@ -7,6 +7,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table';
 import { Badge } from '../ui/badge';
 import FavouriteProfileButton from './favourite-button';
+import { useFetcher } from '@remix-run/react';
+import { Tooltip } from '@radix-ui/react-tooltip';
+import { TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { formatDistance } from 'date-fns';
 
 interface ProfileProps {
   data: {
@@ -24,6 +28,7 @@ interface ProfileProps {
 }
 
 export default function PlayerProfile(props: Readonly<ProfileProps>) {
+  const fetcher = useFetcher();
   const {
     data: { player, chatHead, minutesSince },
   } = props;
@@ -35,6 +40,10 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
     levelsToday: 0,
     xpToday: 0,
   }));
+
+  const now = new Date();
+  const then = now.setTime(now.getMinutes() - minutesSince);
+  const canRefresh = minutesSince > 5;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -61,15 +70,30 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 flex-1 sm:flex-none"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span className="hidden sm:inline">Refresh</span>
-              </Button>
-              <FavouriteProfileButton RSN={player.data.name}/>
+              <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 flex-1 sm:flex-none"
+                      type="submit"
+                      disabled={!canRefresh}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      <span className="hidden sm:inline">Refresh</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      {canRefresh
+                        ? 'Refresh this users data'
+                        : formatDistance(now, then, { includeSeconds: true })}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </fetcher.Form>
+              <FavouriteProfileButton RSN={player.data.name} />
             </div>
           </div>
         </CardHeader>
