@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { RefreshCw, Heart } from 'lucide-react';
-import { RuneMetricsProfileFormatted } from '~/services/runescape.server';
+import { RefreshCw } from 'lucide-react';
+import { RuneMetricsProfileFormatted, SkillData } from '~/services/runescape.server';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table';
@@ -11,6 +11,18 @@ import { useFetcher } from '@remix-run/react';
 import { Tooltip } from '@radix-ui/react-tooltip';
 import { TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { formatDistance } from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { Progress } from "~/components/ui/progress";
 
 interface ProfileProps {
   data: {
@@ -24,6 +36,7 @@ interface ProfileProps {
     };
     chatHead: string;
     minutesSince: number;
+    xpSinceYesterday: number | Record<string, SkillData>;
   };
 }
 
@@ -44,6 +57,15 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
   const now = new Date();
   const then = now.setTime(now.getMinutes() - minutesSince);
   const canRefresh = minutesSince > 5;
+
+  // sample quest data. TODO: fill this with real data
+  const questData = [
+    { category: 'Novice', completed: 45, total: 50 },
+    { category: 'Intermediate', completed: 38, total: 42 },
+    { category: 'Experienced', completed: 28, total: 35 },
+    { category: 'Master', completed: 15, total: 20 },
+    { category: 'Grandmaster', completed: 8, total: 12 },
+  ];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -100,12 +122,15 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
       </Card>
 
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 h-auto">
+        <TabsList className="grid w-full grid-cols-3 h-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">
             Overview
           </TabsTrigger>
           <TabsTrigger value="skills" className="text-xs sm:text-sm py-2">
             Skills
+          </TabsTrigger>
+          <TabsTrigger value="quests" className="text-xs sm:text-sm py-2">
+            Quests
           </TabsTrigger>
         </TabsList>
 
@@ -114,6 +139,42 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-4 sm:space-y-6">
+          {/* Skills Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{props.data.player.data.totalskill}</div>
+                  <div className="text-sm text-muted-foreground">Total Level</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{props.data.player.data.totalxp}</div>
+                  <div className="text-sm text-muted-foreground">Total XP</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">0</div>
+                  <div className="text-sm text-muted-foreground">Levels Today</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-400">0</div>
+                  <div className="text-sm text-muted-foreground">XP Today</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Skill Details</CardTitle>
@@ -134,38 +195,96 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {skillsData.map((skill) => (
-                    <TableRow key={skill.skill}>
-                      <TableCell className="font-medium">{skill.skill}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="secondary">{skill.level}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{skill.virtual}</TableCell>
-                      <TableCell className="text-right">{skill.xp.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">
-                        {skill.levelsToday > 0 ? (
-                          <Badge variant="default" className="bg-green-500">
-                            {skill.levelsToday}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">0</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {skill.xpToday > 0 ? (
-                          <span className="text-green-400 font-medium">
-                            +{skill.xpToday.toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">0</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {skillsData.map((skill) => {
+                    let xpSinceYesterdayRecord: SkillData = { xp: 0, level: 0, rank: 0 };
+                    if (
+                      typeof props.data.xpSinceYesterday === 'object' &&
+                      props.data.xpSinceYesterday !== null
+                    ) {
+                      xpSinceYesterdayRecord = props.data.xpSinceYesterday[skill.skill] ?? {};
+                    }
+
+                    return (
+                      <TableRow key={skill.skill}>
+                        <TableCell className="font-medium">{skill.skill}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant="secondary">{skill.level}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">{skill.virtual}</TableCell>
+                        <TableCell className="text-right">{skill.xp.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">
+                          {xpSinceYesterdayRecord.level > 0 ? (
+                            <Badge variant="default" className="bg-green-500">
+                              {xpSinceYesterdayRecord.level}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {xpSinceYesterdayRecord.xp > 0 ? (
+                            <span className="text-green-400 font-medium">
+                              +{xpSinceYesterdayRecord.xp}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="quests" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quest Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={questData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="category" stroke="#9CA3AF" />
+                    <YAxis stroke="#9CA3AF" />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    />
+                    <Bar dataKey="completed" fill="#a29bfe" />
+                    <Bar dataKey="total" fill="#374151" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Quest Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 sm:space-y-4">
+                  {questData.map((category, index) => (
+                    <div key={category.category} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{category.category}</span>
+                        <span>
+                          {category.completed}/{category.total}
+                        </span>
+                      </div>
+                      <Progress
+                        value={(category.completed / category.total) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
