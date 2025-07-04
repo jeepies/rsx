@@ -34,11 +34,11 @@ interface QuestsTabProps {
 export function QuestsTab({ questData, questsList }: QuestsTabProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'Complete':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'STARTED':
+      case 'In Progress':
         return <Minus className="h-4 w-4 text-yellow-500" />;
-      case 'NOT_STARTED':
+      case 'Not Started':
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return <XCircle className="h-4 w-4 text-gray-400" />;
@@ -47,19 +47,19 @@ export function QuestsTab({ questData, questsList }: QuestsTabProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'Complete':
         return (
           <Badge variant="default" className="bg-green-500">
             Complete
           </Badge>
         );
-      case 'STARTED':
+      case 'In Progress':
         return (
           <Badge variant="default" className="bg-yellow-500">
             In Progress
           </Badge>
         );
-      case 'NOT_STARTED':
+      case 'Not Started':
         return <Badge variant="secondary">Not Started</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
