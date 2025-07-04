@@ -1,4 +1,4 @@
-import { BarChart3, BookUser, Globe, Home, ListTodo } from 'lucide-react';
+import { BarChart3, BookUser, Globe, Heart, Home, ListTodo } from 'lucide-react';
 import { useState } from 'react';
 import {
   Sidebar,
@@ -17,7 +17,9 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Button } from '~/components/ui/button';
-import { NavLink } from '@remix-run/react';
+import { NavLink, useNavigate } from '@remix-run/react';
+import { Card, CardContent } from './ui/card';
+import { useFavourites } from '~/contexts/favourites';
 
 const mainNavItems = [
   { title: 'Home', url: '/dashboard/index', icon: Home },
@@ -29,6 +31,10 @@ export default function DashboardSidebar() {
   const { state } = useSidebar();
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
   const collapsed = state === 'collapsed';
+  const navigate = useNavigate();
+  const { favourites } = useFavourites();
+
+  const handleFavouritesRedirect = (RSN: string) => navigate(`/dashboard/player/${RSN}`);
 
   const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
     const IconComponent =
@@ -60,7 +66,7 @@ export default function DashboardSidebar() {
   return (
     <Sidebar>
       <SidebarContent className="flex flex-col h-full">
-      <div className="h-16 px-4 border-b border-sidebar-border flex items-center justify-between">
+        <div className="h-16 px-4 border-b border-sidebar-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">N</span>
@@ -76,16 +82,16 @@ export default function DashboardSidebar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSelectedLanguage("EN")}>
+                <DropdownMenuItem onClick={() => setSelectedLanguage('EN')}>
                   English
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage("ES")}>
+                <DropdownMenuItem onClick={() => setSelectedLanguage('ES')}>
                   Español
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage("FR")}>
+                <DropdownMenuItem onClick={() => setSelectedLanguage('FR')}>
                   Français
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage("DE")}>
+                <DropdownMenuItem onClick={() => setSelectedLanguage('DE')}>
                   Deutsch
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -103,6 +109,36 @@ export default function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <div className="mt-auto p-4 space-y-4">
+        {!collapsed && (
+          <>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Favourites</span>
+                </div>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  {favourites.length === 0 ? (
+                    <>No favourites yet</>
+                  ) : (
+                    favourites.map((f) => (
+                      <div
+                        className="flex justify-between cursor-pointer hover:text-primary transition"
+                        onClick={() => handleFavouritesRedirect(f)}
+                      >
+                        <span>{f}</span>
+                        <span>2 hours ago</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
     </Sidebar>
   );
 }
