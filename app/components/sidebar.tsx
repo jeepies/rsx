@@ -19,6 +19,7 @@ import {
 import { Button } from '~/components/ui/button';
 import { NavLink, useNavigate } from '@remix-run/react';
 import { Card, CardContent } from './ui/card';
+import { useFavourites } from '~/contexts/favourites';
 
 const mainNavItems = [
   { title: 'Home', url: '/dashboard/index', icon: Home },
@@ -31,6 +32,7 @@ export default function DashboardSidebar() {
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
   const collapsed = state === 'collapsed';
   const navigate = useNavigate();
+  const { favourites } = useFavourites();
 
   const handleFavouritesRedirect = (RSN: string) => navigate(`/dashboard/player/${RSN}`);
 
@@ -118,14 +120,19 @@ export default function DashboardSidebar() {
                   <span className="text-sm font-medium">Favourites</span>
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  {/* this is an example user */}
-                  <div
-                    className="flex justify-between cursor-pointer hover:text-primary transition"
-                    onClick={() => handleFavouritesRedirect(`Kelcei`)}
-                  >
-                    <span>Kelcei</span>
-                    <span>2 hours ago</span>
-                  </div>
+                  {favourites.length === 0 ? (
+                    <>No favourites yet</>
+                  ) : (
+                    favourites.map((f) => (
+                      <div
+                        className="flex justify-between cursor-pointer hover:text-primary transition"
+                        onClick={() => handleFavouritesRedirect(f)}
+                      >
+                        <span>{f}</span>
+                        <span>2 hours ago</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
