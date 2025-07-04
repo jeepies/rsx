@@ -1,4 +1,5 @@
 import { SkillName } from '@prisma/client';
+import { TransformedQuestData } from './quest.server';
 
 const skillIdToNameMap: Record<number, SkillName> = {
   0: 'Attack',
@@ -63,6 +64,7 @@ export interface TransformedPlayerData {
   loggedIn: boolean;
   skills: Record<SkillName, SkillData>;
   activities: ActivityData[];
+  quests?: TransformedQuestData[];
 }
 
 function parseNumber(str: string | number): number {
@@ -108,7 +110,6 @@ export function transformPlayerData(raw: RawPlayerData): TransformedPlayerData {
       details,
     };
   });
-
 
   return {
     username: raw.name,

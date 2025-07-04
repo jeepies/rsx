@@ -9,8 +9,12 @@ export interface TransformedQuestData {
   userEligible: boolean;
 }
 
-export function transformQuestData(data: QuestData[]): TransformedQuestData[] {
-  return data.map((q) => ({
+export function transformQuestData(
+  data: QuestData[] | { quests: QuestData[] },
+): TransformedQuestData[] {
+  const questsArray = Array.isArray(data) ? data : (data?.quests ?? []);
+
+  return questsArray.map((q) => ({
     title: q.title,
     status: q.status,
     difficulty: q.difficulty,
