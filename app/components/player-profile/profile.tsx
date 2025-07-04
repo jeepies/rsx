@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { RefreshCw, Heart } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { RuneMetricsProfileFormatted, SkillData } from '~/services/runescape.server';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
@@ -11,6 +11,18 @@ import { useFetcher } from '@remix-run/react';
 import { Tooltip } from '@radix-ui/react-tooltip';
 import { TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { formatDistance } from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { Progress } from "~/components/ui/progress";
 
 interface ProfileProps {
   data: {
@@ -45,6 +57,15 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
   const now = new Date();
   const then = now.setTime(now.getMinutes() - minutesSince);
   const canRefresh = minutesSince > 5;
+
+  // sample quest data. TODO: fill this with real data
+  const questData = [
+    { category: 'Novice', completed: 45, total: 50 },
+    { category: 'Intermediate', completed: 38, total: 42 },
+    { category: 'Experienced', completed: 28, total: 35 },
+    { category: 'Master', completed: 15, total: 20 },
+    { category: 'Grandmaster', completed: 8, total: 12 },
+  ];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -101,12 +122,15 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
       </Card>
 
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 h-auto">
+        <TabsList className="grid w-full grid-cols-3 h-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">
             Overview
           </TabsTrigger>
           <TabsTrigger value="skills" className="text-xs sm:text-sm py-2">
             Skills
+          </TabsTrigger>
+          <TabsTrigger value="quests" className="text-xs sm:text-sm py-2">
+            Quests
           </TabsTrigger>
         </TabsList>
 
@@ -213,6 +237,54 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="quests" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quest Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={questData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="category" stroke="#9CA3AF" />
+                    <YAxis stroke="#9CA3AF" />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    />
+                    <Bar dataKey="completed" fill="#a29bfe" />
+                    <Bar dataKey="total" fill="#374151" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Quest Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 sm:space-y-4">
+                  {questData.map((category, index) => (
+                    <div key={category.category} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{category.category}</span>
+                        <span>
+                          {category.completed}/{category.total}
+                        </span>
+                      </div>
+                      <Progress
+                        value={(category.completed / category.total) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
