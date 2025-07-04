@@ -24,9 +24,9 @@ model PlayerSnapshot {
   timestamp DateTime @default(now())
 
   rank    Int
-  totalXp Int
-  totalSkill Int
-  combatLevel Int
+  totalXp BigInt
+  totalSkill BigInt
+  combatLevel BigInt
   loggedIn Boolean
 
   playerId String
@@ -45,8 +45,8 @@ model SkillSnapshot {
 
   name  SkillName
   xp    BigInt
-  rank  Int
-  level Int
+  rank  BigInt
+  level BigInt
 }
 
 model ActivitySnapshot {
