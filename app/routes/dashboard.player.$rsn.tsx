@@ -74,9 +74,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
     const jsonData = toJsonValue(data);
 
-    player = await prisma.player.update({
-      where: { rsn },
-      data: { data: JSON.parse(JSON.stringify(jsonData)), lastFetched: now },
+    player = await prisma.player.updateData(JSON.parse(JSON.stringify(jsonData)), {
+      rsn: rsn,
     });
 
     await redis.set(redisKey, '1', { EX: config.TIMINGS.FETCH_LOCK });
@@ -132,10 +131,10 @@ export default function PlayerPage() {
   }
 
   if (!data) {
-    return <PlayerNotFound RSN={params.rsn || ''} key={`notfound-${rsnKey}`} />;
+    return <PlayerNotFound RSN={params.rsn || ''} />;
   }
 
-  return <PlayerProfile data={data} key={`profile-${rsnKey}`}  />;
+  return <PlayerProfile data={data} key={`profile-${rsnKey}`} />;
 }
 
 export function ErrorBoundary() {
