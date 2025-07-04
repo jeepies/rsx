@@ -1,4 +1,10 @@
-type RuneMetricsProfile = {
+export interface SkillData {
+  level: number;
+  xp: number;
+  rank: number;
+}
+
+export interface RuneMetricsProfile {
   name: string;
   rank: string;
   totalskill: number;
@@ -10,30 +16,30 @@ type RuneMetricsProfile = {
   questsstarted: number;
   questscomplete: number;
   questsnotstarted: number;
-  loggedIn: boolean;
-  activities: {
-    date: string;
-    details: string;
-    text: string;
-  }[];
+  activities: any[];
   skillvalues: {
     id: number;
     level: number;
     xp: number;
     rank: number;
   }[];
-};
+  loggedIn: string;
+}
 
-type QuestStatus = 'NOT_STARTED' | 'STARTED' | 'COMPLETED';
+export interface RuneMetricsProfileFormatted
+  extends Omit<RuneMetricsProfile, 'loggedIn' | 'skillvalues'> {
+  loggedIn: boolean;
+  formattedSkills: Record<string, SkillData>;
+}
 
-type RuneMetricsQuest = {
+export interface QuestData {
   title: string;
-  status: QuestStatus;
+  status: string;
   difficulty: number;
   members: boolean;
   questPoints: number;
   userEligible: boolean;
-};
+}
 
 export class RunescapeAPI {
   private static skillIdToNameMap: Record<number, string> = {
@@ -68,58 +74,24 @@ export class RunescapeAPI {
     28: 'Necromancy',
   };
 
-  static async fetchRuneMetricsProfile(rsn: string): Promise<RuneMetricsProfile & { formattedSkills: ReturnType<typeof RunescapeAPI.formatSkills> }> {
-    const url = `https://apps.runescape.com/runemetrics/profile/profile?user=${encodeURIComponent(rsn)}&activities=20`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`RuneMetrics profile fetch failed: ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(`RuneMetrics profile error: ${data.error}`);
-    return {
-      ...data,
-      loggedIn: data.loggedIn === 'true',
-      formattedSkills: this.formatSkills(data.skillvalues),
-    };
-  }
-
-  static async fetchRuneMetricsQuests(rsn: string): Promise<RuneMetricsQuest[]> {
-    const url = `https://apps.runescape.com/runemetrics/quests?user=${encodeURIComponent(rsn)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`RuneMetrics quests fetch failed: ${res.status}`);
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error(`Invalid RuneMetrics quests response`);
-    return data.map((q) => ({
-      title: q.title,
-      status: q.status,
-      difficulty: q.difficulty,
-      members: q.members,
-      questPoints: q.questPoints,
-      userEligible: q.userEligible,
-    }));
-  }
-
-  static getChatheadUrl(rsn: string): string {
-    return `https://secure.runescape.com/m=avatar-rs/${encodeURIComponent(rsn.trim())}/chat.png`;
+  static safeParse<T>(data: unknown): T | null {
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data) as T;
+      } catch {
+        return null;
+      }
+    }
+    if (typeof data === 'object' && data !== null) {
+      return data as T;
+    }
+    return null;
   }
 
   static formatSkills(
     skillvalues: { id: number; level: number; xp: number; rank: number }[],
-  ): Record<
-    string,
-    {
-      level: number;
-      xp: number;
-      rank: number;
-    }
-  > {
-    const formatted: Record<
-      string,
-      {
-        level: number;
-        xp: number;
-        rank: number;
-      }
-    > = {};
-
+  ): Record<string, SkillData> {
+    const formatted: Record<string, SkillData> = {};
     for (const skill of skillvalues) {
       const skillName = this.skillIdToNameMap[skill.id];
       if (skillName) {
@@ -131,5 +103,33 @@ export class RunescapeAPI {
       }
     }
     return formatted;
+  }
+
+  static async fetchRuneMetricsProfile(rsn: string): Promise<RuneMetricsProfileFormatted> {
+    const url = `https://apps.runescape.com/runemetrics/profile/profile?user=${encodeURIComponent(
+      rsn,
+    )}&activities=20`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`RuneMetrics profile fetch failed: ${res.status}`);
+    const data = (await res.json()) as RuneMetricsProfile;
+    if ((data as any).error) throw new Error(`RuneMetrics profile error: ${(data as any).error}`);
+
+    return {
+      ...data,
+      loggedIn: data.loggedIn === 'true',
+      formattedSkills: this.formatSkills(data.skillvalues),
+    };
+  }
+
+  static async fetchRuneMetricsQuests(rsn: string): Promise<QuestData[]> {
+    const url = `https://apps.runescape.com/runemetrics/quests?user=${encodeURIComponent(rsn)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`RuneMetrics quests fetch failed: ${res.status}`);
+    const data = (await res.json()) as QuestData[];
+    return data;
+  }
+
+  static getChatheadUrl(rsn: string): string {
+    return `https://secure.runescape.com/m=avatar-rs/${encodeURIComponent(rsn)}/chat.png`;
   }
 }
