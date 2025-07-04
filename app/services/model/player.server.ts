@@ -35,6 +35,11 @@ export async function commitLock(rsn: string): Promise<void> {
   await redis.set(getRedisKey(rsn), '1', { EX: config.TIMINGS.FETCH_LOCK });
 }
 
+/**
+ * Get the most up-to-date data
+ * @param rsn Runecape Name
+ * @returns User
+ */
 export async function getFreshestData(rsn: string) {
   // okay for the first time in a while i'll write some in-depth comments
   // because this will be a chonky boy
