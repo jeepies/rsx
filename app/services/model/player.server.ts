@@ -6,6 +6,7 @@ import { TransformedPlayerData, transformPlayerData } from '../transformers/play
 import { RunescapeAPI } from '~/services/runescape.server';
 import { getWithinTimePeriod } from './snapshot.server';
 import { format } from 'date-fns';
+import { transformQuestData } from '../transformers/quest.server';
 
 // i sure fucking hope this doesn't change ever....
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -84,6 +85,7 @@ export async function getFreshestData(rsn: string) {
     await commitLock(rsn);
     try {
       const rawProfile = await RunescapeAPI.fetchRuneMetricsProfile(rsn);
+      const questRaw = await RunescapeAPI.fetchRuneMetricsQuests(rsn);
 
       const rawData = {
         name: rawProfile.name,
@@ -101,6 +103,7 @@ export async function getFreshestData(rsn: string) {
       };
 
       const transformedData = transformPlayerData(rawData);
+      const transformedQuests = transformQuestData(questRaw);
 
       // create a snapshot of this moment
       await prisma.playerSnapshot.create({
@@ -127,6 +130,16 @@ export async function getFreshestData(rsn: string) {
               details: a.details,
             })),
           },
+          quests: {
+            create: transformedQuests.map((q) => ({
+              title: q.title,
+              status: q.status,
+              difficulty: q.difficulty,
+              members: q.members,
+              questPoints: q.questPoints,
+              userEligible: q.userEligible,
+            })),
+          },
         },
       });
 
@@ -136,16 +149,22 @@ export async function getFreshestData(rsn: string) {
         data: { lastFetchedAt: new Date() },
       });
 
-      // cache it please
+      // cache it please (excluding quests for now — add if needed)
       await redis.set(
         cacheKey,
-        JSON.stringify({ ...transformedData, fetchedAt: Date.now() }, bigintReplacer),
+        JSON.stringify(
+          { ...transformedData, quests: transformedQuests, fetchedAt: Date.now() },
+          bigintReplacer,
+        ),
         {
           EX: config.TIMINGS.AUTO_REFRESH,
         },
       );
 
-      return transformedData;
+      return {
+        ...transformedData,
+        quests: transformedQuests,
+      };
     } catch (error) {
       console.error(`Fetch failed for ${rsn}:`, error);
       // lets just get the stale old db record :(
@@ -160,6 +179,7 @@ export async function getFreshestData(rsn: string) {
           include: {
             skills: true,
             activities: true,
+            quests: true,
           },
         },
       },
@@ -193,6 +213,14 @@ export async function getFreshestData(rsn: string) {
           text: a.text,
           details: a.details,
         })),
+        quests: latest.quests.map((q) => ({
+          title: q.title,
+          status: q.status,
+          difficulty: q.difficulty,
+          members: q.members,
+          questPoints: q.questPoints,
+          userEligible: q.userEligible,
+        })),
       };
     }
 
@@ -206,6 +234,7 @@ export async function getFreshestData(rsn: string) {
       loggedIn: false,
       skills: {},
       activities: [],
+      quests: [],
     };
   }
 }

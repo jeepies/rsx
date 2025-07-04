@@ -22,6 +22,11 @@ import {
   getRefreshTimestamp,
 } from '~/services/model/player.server';
 import { prisma } from '~/services/prisma.server';
+import {
+  getAllQuestsForUser,
+  getEligibleQuests,
+  getQuestsByStatus,
+} from '~/services/model/quest.server';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const start = Date.now();
@@ -45,12 +50,24 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response('Player not found', { status: 404 });
   }
 
-  const [dailyXpIncreases, weeklyXp, dailyLevelIncreases, dailyRankIncrease, refreshTimestamp] = await Promise.all([
+  const [
+    dailyXpIncreases,
+    weeklyXp,
+    dailyLevelIncreases,
+    dailyRankIncrease,
+    refreshTimestamp,
+    eligibleQuests,
+    completedQuests,
+    allQuests,
+  ] = await Promise.all([
     getDailyXpIncreases(rsn),
     getDailyXPForWeek(rsn),
     getDailyLevelIncreases(rsn),
     getDailyRankIncrease(rsn),
-    getRefreshTimestamp(rsn)
+    getRefreshTimestamp(rsn),
+    getEligibleQuests(rsn),
+    getQuestsByStatus(rsn, 'COMPLETED'),
+    getAllQuestsForUser(rsn),
   ]);
 
   const elapsed = Date.now() - start;
@@ -73,7 +90,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
       dailyLevelIncreases,
       weeklyXp,
       dailyRankIncrease,
-      refreshTimestamp
+      refreshTimestamp,
+      quests: {
+        eligibleQuests,
+        completedQuests,
+        allQuests,
+      }
     },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),
   };
