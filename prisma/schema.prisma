@@ -8,25 +8,84 @@ datasource db {
 }
 
 model Player {
-  id          String           @id @default(cuid())
-  rsn         String           @unique
-  data        Json // this is lazy, and is a for-now approach.
-  lastFetched DateTime
-  snapshots   PlayerSnapshot[]
+  id       String @id @default(cuid())
+  username String @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  snapshots PlayerSnapshot[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastFetchedAt DateTime @default(now())
 }
 
 model PlayerSnapshot {
-  id        Int      @id @default(autoincrement())
-  playerId  String
+  id String @id @default(cuid())
+
   timestamp DateTime @default(now())
 
-  data Json // another laziness
+  rank    Int
+  totalXp Int
+  totalSkill Int
+  combatLevel Int
+  loggedIn Boolean
 
-  player Player @relation(fields: [playerId], references: [id])
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id])
+
+  skills     SkillSnapshot[]
+  activities ActivitySnapshot[]
 
   @@index([playerId, timestamp])
 }
 
+model SkillSnapshot {
+  id         String         @id @default(cuid())
+  snapshot   PlayerSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshotId String
+
+  name  SkillName
+  xp    BigInt
+  rank  Int
+  level Int
+}
+
+model ActivitySnapshot {
+  id         String         @id @default(cuid())
+  snapshot   PlayerSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshotId String
+
+  date    DateTime
+  text    String
+  details String
+}
+
+enum SkillName {
+  Attack
+  Defence
+  Strength
+  Constitution
+  Ranged
+  Prayer
+  Magic
+  Cooking
+  Woodcutting
+  Fletching
+  Fishing
+  Firemaking
+  Crafting
+  Smithing
+  Mining
+  Herblore
+  Agility
+  Thieving
+  Slayer
+  Farming
+  Runecrafting
+  Hunter
+  Construction
+  Summoning
+  Dungeoneering
+  Divination
+  Invention
+  Archaeology
+}
