@@ -23,11 +23,11 @@ model PlayerSnapshot {
 
   timestamp DateTime @default(now())
 
-  rank    Int
-  totalXp BigInt
-  totalSkill BigInt
+  rank        Int
+  totalXp     BigInt
+  totalSkill  BigInt
   combatLevel BigInt
-  loggedIn Boolean
+  loggedIn    Boolean
 
   playerId String
   player   Player @relation(fields: [playerId], references: [id])
@@ -57,6 +57,8 @@ model ActivitySnapshot {
   date    DateTime
   text    String
   details String
+
+  @@unique([snapshotId, date, text])
 }
 
 enum SkillName {
