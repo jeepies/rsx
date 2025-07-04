@@ -13,6 +13,6 @@ model Player {
   data        Json // this is lazy, and is a for-now approach.
   lastFetched DateTime
 
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
