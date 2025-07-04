@@ -16,6 +16,7 @@ import { sanitizeBigInts, sleep } from '~/lib/utils';
 import {
   getDailyLevelIncreases,
   getDailyRankIncrease,
+  getDailyXPForWeek,
   getDailyXpIncreases,
   getFreshestData,
 } from '~/services/model/player.server';
@@ -43,8 +44,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response('Player not found', { status: 404 });
   }
 
-  const [dailyXpIncreases, dailyLevelIncreases, dailyRankIncrease] = await Promise.all([
+  const [dailyXpIncreases, weeklyXp, dailyLevelIncreases, dailyRankIncrease] = await Promise.all([
     getDailyXpIncreases(rsn),
+    getDailyXPForWeek(rsn),
     getDailyLevelIncreases(rsn),
     getDailyRankIncrease(rsn),
   ]);
@@ -67,6 +69,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       updatedAt: sanitizedPlayerMeta.updatedAt,
       dailyXpIncreases,
       dailyLevelIncreases,
+      weeklyXp,
       dailyRankIncrease,
     },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),

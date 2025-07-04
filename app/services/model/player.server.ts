@@ -5,6 +5,7 @@ import redis from '../redis.server';
 import { TransformedPlayerData, transformPlayerData } from '../transformers/player.server';
 import { RunescapeAPI } from '~/services/runescape.server';
 import { getWithinTimePeriod } from './snapshot.server';
+import { format } from 'date-fns';
 
 // i sure fucking hope this doesn't change ever....
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -273,4 +274,39 @@ export async function getDailyRankIncrease(rsn: string): Promise<number> {
   const last = snapshots[snapshots.length - 1];
 
   return last.rank - first.rank;
+}
+
+export async function getDailyXPForWeek(rsn: string): Promise<{ date: string; dailyXP: number }[]> {
+  const now = new Date();
+  const eightDaysAgo = new Date(now.getTime() - ONE_DAY_MS * 8);
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: eightDaysAgo,
+    to: now,
+    order: 'asc',
+  });
+  if (snapshots.length < 2) return [];
+  const grouped: Record<string, typeof snapshots> = {};
+  for (const snap of snapshots) {
+    const dayKey = format(snap.timestamp, 'yyyy-MM-dd');
+    if (!grouped[dayKey]) grouped[dayKey] = [];
+    grouped[dayKey].push(snap);
+  }
+  const sortedDays = Object.keys(grouped).sort();
+  const xpData: { date: string; dailyXP: number }[] = [];
+  for (let i = 0; i < sortedDays.length; i++) {
+    const day = sortedDays[i];
+    const daySnaps = grouped[day];
+    if (daySnaps.length < 2) continue;
+    const firstSnap = daySnaps[0];
+    const lastSnap = daySnaps[daySnaps.length - 1];
+    const firstXp = Number(firstSnap.totalXp);
+    const lastXp = Number(lastSnap.totalXp);
+    const xpDiff = Math.max(lastXp - firstXp, 0);
+    xpData.push({
+      date: `Day ${xpData.length + 1}`,
+      dailyXP: xpDiff,
+    });
+  }
+  return xpData;
 }

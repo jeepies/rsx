@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, TrendingUp } from 'lucide-react';
 import { RuneMetricsProfileFormatted, SkillData } from '~/services/runescape.server';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
@@ -46,6 +46,10 @@ export interface ProfileProps {
       dailyXpIncreases: Record<string, number>;
       dailyLevelIncreases: Record<string, number>;
       dailyRankIncrease: number;
+      weeklyXp: {
+        date: string;
+        dailyXP: number;
+      }[];
     };
     chatHead: string;
   };
@@ -151,7 +155,43 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-          ...
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                Daily XP Progress
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Daily experience gained over the last 7 days
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={player.weeklyXp}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="date" stroke="#9CA3AF" />
+                  <YAxis
+                    stroke="#9CA3AF"
+                    tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    formatter={(value) => [
+                      `${(Number(value) / 1000000).toFixed(1)}M XP`,
+                      'Daily XP',
+                    ]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="dailyXP"
+                    stroke="#a29bfe"
+                    strokeWidth={3}
+                    dot={{ fill: '#a29bfe' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-4 sm:space-y-6">
@@ -195,7 +235,9 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Skill Details</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                Skill Details
+              </CardTitle>
               <CardDescription>
                 Detailed breakdown of all skill levels and experience
               </CardDescription>
