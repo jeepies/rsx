@@ -59,6 +59,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return {
       player: { ...player, data },
       chatHead: RunescapeAPI.getChatheadUrl(rsn),
+      xpSinceYesterday: 0,
       minutesSince: 0,
     };
   }
@@ -91,6 +92,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return {
       player: { ...player, data },
       chatHead: RunescapeAPI.getChatheadUrl(rsn),
+      xpSinceYesterday,
       minutesSince: 0,
     };
   }
@@ -105,6 +107,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return {
     player: { ...player, data: parsedData },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),
+    xpSinceYesterday,
     minutesSince,
   };
 }
