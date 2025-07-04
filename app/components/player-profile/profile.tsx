@@ -55,14 +55,21 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
   const {
     data: { player, chatHead },
   } = props;
-  const skillsData = Object.entries(player.data.skills).map(([skill, data]) => ({
-    skill,
-    level: data.level > 99 ? 99 : data.level,
-    xp: data.xp,
-    virtual: data.level,
-    // levelsToday: player.dailyLevelIncreases?.[skill.toLowerCase()] ?? 0,
-    // xpToday: player.dailyXpIncreases?.[skill.toLowerCase()] ?? 0,
-  }));
+  const skillsData = Object.entries(player.data.skills).map(([skill, data]) => {
+    const skillKey = skill.toLowerCase();
+
+    const levelsTodayForSkill = player.dailyLevelIncreases?.[skillKey] ?? 0;
+    const xpTodayForSkill = player.dailyXpIncreases?.[skillKey] ?? 0;
+
+    return {
+      skill,
+      level: data.level > 99 ? 99 : data.level,
+      xp: data.xp,
+      virtual: data.level,
+      levelsTodayForSkill,
+      xpTodayForSkill,
+    };
+  });
 
   const levelsToday = Object.values(player.dailyLevelIncreases).reduce((a, b) => a + b, 0);
   const xpToday = Object.values(player.dailyXpIncreases).reduce((a, b) => a + b, 0);
@@ -206,44 +213,34 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {skillsData.map((skill) => {
-                    let xpSinceYesterdayRecord: SkillData = { xp: 0, level: 0, rank: 0 };
-                    // if (
-                    //   typeof props.data.xpSinceYesterday === 'object' &&
-                    //   props.data.xpSinceYesterday !== null
-                    // ) {
-                    //   xpSinceYesterdayRecord = props.data.xpSinceYesterday[skill.skill] ?? {};
-                    // }
-
-                    return (
-                      <TableRow key={skill.skill}>
-                        <TableCell className="font-medium">{skill.skill}</TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant="secondary">{skill.level}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">{skill.virtual}</TableCell>
-                        <TableCell className="text-right">{formatBigInt(skill.xp)}</TableCell>
-                        <TableCell className="text-right">
-                          {xpSinceYesterdayRecord.level > 0 ? (
-                            <Badge variant="default" className="bg-green-500">
-                              {xpSinceYesterdayRecord.level}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">0</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {xpSinceYesterdayRecord.xp > 0 ? (
-                            <span className="text-green-400 font-medium">
-                              +{xpSinceYesterdayRecord.xp}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">0</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {skillsData.map((skill) => (
+                    <TableRow key={skill.skill}>
+                      <TableCell className="font-medium">{skill.skill}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="secondary">{skill.level}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{skill.virtual}</TableCell>
+                      <TableCell className="text-right">{formatBigInt(skill.xp)}</TableCell>
+                      <TableCell className="text-right">
+                        {skill.levelsTodayForSkill > 0 ? (
+                          <Badge variant="default" className="bg-green-500">
+                            {skill.levelsTodayForSkill}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {skill.xpTodayForSkill > 0 ? (
+                          <span className="text-green-400 font-medium">
+                            +{skill.xpTodayForSkill}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -278,7 +275,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 sm:space-y-4">
-                  {questData.map((category, index) => (
+                  {questData.map((category) => (
                     <div key={category.category} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>{category.category}</span>
