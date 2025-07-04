@@ -16,6 +16,7 @@ import { RuneMetricsProfileFormatted, RunescapeAPI } from '~/services/runescape.
 import PlayerNotFound from '~/components/player-profile/not-found';
 import PlayerProfile from '~/components/player-profile/profile';
 import { sleep, toJsonValue } from '~/lib/utils';
+import { getXPSinceYesterday } from '~/services/model/player.server';
 
 function parsePlayerData(rawData: unknown): RuneMetricsProfileFormatted {
   const parsed = RunescapeAPI.safeParse<RuneMetricsProfileFormatted>(rawData);
@@ -61,6 +62,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
       minutesSince: 0,
     };
   }
+
+  const xpSinceYesterday = await getXPSinceYesterday(rsn);
 
   const minutesSince = (now.getTime() - new Date(player.lastFetched).getTime()) / 60000;
 
