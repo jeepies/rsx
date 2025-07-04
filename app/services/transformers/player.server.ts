@@ -69,7 +69,8 @@ export interface TransformedPlayerData {
 
 function parseNumber(str: string | number): number {
   if (typeof str === 'number') return str;
-  return parseInt(str.replace(/,/g, ''), 10);
+  if (typeof str === 'string') return parseInt(str.replace(/,/g, ''), 10);
+  throw new Error(`oh dear.`);
 }
 
 export function transformPlayerData(raw: RawPlayerData): TransformedPlayerData {

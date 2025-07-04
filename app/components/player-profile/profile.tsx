@@ -23,6 +23,8 @@ import {
 } from 'recharts';
 import { Progress } from '~/components/ui/progress';
 import { formatBigInt } from '~/lib/utils';
+import { RawQuest, translateQuests } from '~/lib/quests';
+import { QuestsTab } from './quests-tab';
 
 export interface ProfileProps {
   data: {
@@ -50,9 +52,20 @@ export interface ProfileProps {
         dailyXP: number;
       }[];
       refreshTimestamp: number;
+      quests: {
+        eligibleQuests: RawQuest[];
+        completedQuests: RawQuest[];
+        allQuests: RawQuest[];
+      };
     };
     chatHead: string;
   };
+}
+
+interface QuestData {
+  category: string;
+  completed: number;
+  total: number;
 }
 
 export default function PlayerProfile(props: Readonly<ProfileProps>) {
@@ -80,17 +93,28 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
   const xpToday = Object.values(player.dailyXpIncreases).reduce((a, b) => a + b, 0);
 
   const now = new Date();
-  const refreshTimestampDate = new Date(props.data.player.refreshTimestamp);
+  const refreshTimestampDate = new Date(player.refreshTimestamp);
   const canRefresh = refreshTimestampDate < now;
 
-  // sample quest data. TODO: fill this with real data
-  const questData = [
-    { category: 'Novice', completed: 45, total: 50 },
-    { category: 'Intermediate', completed: 38, total: 42 },
-    { category: 'Experienced', completed: 28, total: 35 },
-    { category: 'Master', completed: 15, total: 20 },
-    { category: 'Grandmaster', completed: 8, total: 12 },
-  ];
+  const questsList = translateQuests(player.quests);
+
+  const questDataMap = new Map<string, { completed: number; total: number }>();
+  for (const quest of questsList) {
+    const { category, status } = quest;
+    if (!questDataMap.has(category)) {
+      questDataMap.set(category, { completed: 0, total: 0 });
+    }
+    const entry = questDataMap.get(category)!;
+    entry.total += 1;
+    if (status === 'Complete') {
+      entry.completed += 1;
+    }
+  }
+  const questData: QuestData[] = Array.from(questDataMap.entries()).map(([category, data]) => ({
+    category,
+    completed: data.completed,
+    total: data.total,
+  }));
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -201,7 +225,6 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-4 sm:space-y-6">
-          {/* Skills Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
@@ -296,51 +319,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsContent>
 
         <TabsContent value="quests" className="space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quest Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={questData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="category" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <RechartsTooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                    />
-                    <Bar dataKey="completed" fill="#a29bfe" />
-                    <Bar dataKey="total" fill="#374151" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quest Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 sm:space-y-4">
-                  {questData.map((category) => (
-                    <div key={category.category} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>{category.category}</span>
-                        <span>
-                          {category.completed}/{category.total}
-                        </span>
-                      </div>
-                      <Progress
-                        value={(category.completed / category.total) * 100}
-                        className="h-2"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <QuestsTab questData={questData} questsList={questsList} />
         </TabsContent>
       </Tabs>
     </div>

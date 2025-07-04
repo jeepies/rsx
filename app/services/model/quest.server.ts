@@ -50,3 +50,31 @@ export async function getEligibleQuests(rsn: string) {
 
   return latestSnapshot.quests.filter((q) => q.userEligible);
 }
+
+export async function getAllQuestsForUser(rsn: string) {
+  const player = await prisma.player.findUnique({
+    where: { username: rsn },
+    include: {
+      snapshots: {
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        include: {
+          quests: true,
+        },
+      },
+    },
+  });
+
+  if (!player || !player.snapshots.length) {
+    return [];
+  }
+
+  return player.snapshots[0].quests.map((q) => ({
+    title: q.title,
+    status: q.status,
+    difficulty: q.difficulty,
+    members: q.members,
+    questPoints: q.questPoints,
+    userEligible: q.userEligible,
+  }));
+}
