@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table';
 import { Badge } from '../ui/badge';
+import FavouriteProfileButton from './favourite-button';
 
 interface ProfileProps {
   data: {
@@ -68,14 +69,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                 <RefreshCw className="h-4 w-4" />
                 <span className="hidden sm:inline">Refresh</span>
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex items-center gap-2 flex-1 sm:flex-none"
-              >
-                <Heart className={`h-4 w-4`} />
-                <span className="hidden sm:inline">Favourite</span>
-              </Button>
+              <FavouriteProfileButton RSN={player.data.name}/>
             </div>
           </div>
         </CardHeader>
