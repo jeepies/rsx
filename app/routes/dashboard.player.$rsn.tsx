@@ -57,9 +57,9 @@ export default function PlayerPage() {
 
   const skillsData = Object.entries(data.data!.formattedSkills).map(([skill, data]) => ({
     skill,
-    level: data.level,
+    level: data.level > 99 ? 99 : data.level,
     xp: data.xp,
-    virtual: data.level,    // example: virtual level = current level
+    virtual: data.level,
     levelsToday: 0,         // default, or compute if you want
     xpToday: 0              // default, or compute if you want
   }));
