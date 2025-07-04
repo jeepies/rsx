@@ -31,3 +31,7 @@ export function sanitizeBigInts(obj: any): any {
 export function bigintReplacer(key: string, value: any) {
   return typeof value === 'bigint' ? value.toString() : value;
 }
+
+export function formatBigInt(number: number) {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

@@ -23,6 +23,7 @@ import {
   Bar,
 } from 'recharts';
 import { Progress } from '~/components/ui/progress';
+import { formatBigInt } from '~/lib/utils';
 
 export interface ProfileProps {
   data: {
@@ -154,7 +155,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{props.data.player.data.totalXp}</div>
+                  <div className="text-2xl font-bold">{formatBigInt(props.data.player.data.totalXp)}</div>
                   <div className="text-sm text-muted-foreground">Total XP</div>
                 </div>
               </CardContent>
@@ -213,7 +214,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                           <Badge variant="secondary">{skill.level}</Badge>
                         </TableCell>
                         <TableCell className="text-right">{skill.virtual}</TableCell>
-                        <TableCell className="text-right">{skill.xp.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</TableCell>
+                        <TableCell className="text-right">{formatBigInt(skill.xp)}</TableCell>
                         <TableCell className="text-right">
                           {xpSinceYesterdayRecord.level > 0 ? (
                             <Badge variant="default" className="bg-green-500">
