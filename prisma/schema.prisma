@@ -57,8 +57,6 @@ model ActivitySnapshot {
   date    DateTime
   text    String
   details String
-
-  @@unique([snapshotId, date, text])
 }
 
 enum SkillName {

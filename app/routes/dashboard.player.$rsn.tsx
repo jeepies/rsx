@@ -19,6 +19,7 @@ import {
   getDailyXPForWeek,
   getDailyXpIncreases,
   getFreshestData,
+  getRefreshTimestamp,
 } from '~/services/model/player.server';
 import { prisma } from '~/services/prisma.server';
 
@@ -44,11 +45,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response('Player not found', { status: 404 });
   }
 
-  const [dailyXpIncreases, weeklyXp, dailyLevelIncreases, dailyRankIncrease] = await Promise.all([
+  const [dailyXpIncreases, weeklyXp, dailyLevelIncreases, dailyRankIncrease, refreshTimestamp] = await Promise.all([
     getDailyXpIncreases(rsn),
     getDailyXPForWeek(rsn),
     getDailyLevelIncreases(rsn),
     getDailyRankIncrease(rsn),
+    getRefreshTimestamp(rsn)
   ]);
 
   const elapsed = Date.now() - start;
@@ -71,6 +73,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       dailyLevelIncreases,
       weeklyXp,
       dailyRankIncrease,
+      refreshTimestamp
     },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),
   };
