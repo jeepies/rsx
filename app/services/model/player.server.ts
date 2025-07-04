@@ -1,3 +1,4 @@
+import { bigintReplacer } from '~/lib/utils';
 import config from '../config.server';
 import { prisma } from '../prisma.server';
 import redis from '../redis.server';
@@ -95,7 +96,7 @@ export async function getFreshestData(rsn: string) {
           playerId: player.id,
           timestamp: new Date(),
           rank: transformedData.rank,
-          totalXp: transformedData.totalXp,
+          totalXp: transformedData.totalXp, // do not know how to serialize a bigint
           totalSkill: transformedData.totalSkill,
           combatLevel: transformedData.combatLevel,
           loggedIn: transformedData.loggedIn,
@@ -124,10 +125,9 @@ export async function getFreshestData(rsn: string) {
       });
 
       // cache it please
-      await redis.set(cacheKey, JSON.stringify({ ...transformedData, fetchedAt: Date.now() }), {
+      await redis.set(cacheKey, JSON.stringify({ ...transformedData, fetchedAt: Date.now() }, bigintReplacer), {
         EX: config.TIMINGS.AUTO_REFRESH,
       });
-
       return transformedData;
     } catch (error) {
       console.error(`Fetch failed for ${rsn}:`, error);
@@ -162,8 +162,8 @@ export async function getFreshestData(rsn: string) {
           (acc, skill) => {
             acc[skill.name] = {
               xp: Number(skill.xp),
-              level: skill.level,
-              rank: skill.rank,
+              level: Number(skill.level),
+              rank: Number(skill.rank),
             };
             return acc;
           },

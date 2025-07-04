@@ -27,3 +27,7 @@ export function sanitizeBigInts(obj: any): any {
   }
   return obj;
 }
+
+export function bigintReplacer(key: string, value: any) {
+  return typeof value === 'bigint' ? value.toString() : value;
+}
