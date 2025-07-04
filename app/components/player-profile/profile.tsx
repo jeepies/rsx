@@ -22,30 +22,36 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { Progress } from "~/components/ui/progress";
+import { Progress } from '~/components/ui/progress';
 
-interface ProfileProps {
+export interface ProfileProps {
   data: {
     player: {
       id: string;
       rsn: string;
-      data: RuneMetricsProfileFormatted;
+      data: {
+        username: string;
+        rank: number;
+        totalXp: number;
+        totalSkill: number;
+        combatLevel: number;
+        loggedIn: boolean;
+        skills: Record<string, { xp: number; level: number; rank: number }>;
+        activities: any[];
+      };
       lastFetched: Date;
       createdAt: Date;
       updatedAt: Date;
     };
     chatHead: string;
-    minutesSince: number;
-    xpSinceYesterday: number | Record<string, SkillData>;
   };
 }
 
 export default function PlayerProfile(props: Readonly<ProfileProps>) {
-  const fetcher = useFetcher();
   const {
-    data: { player, chatHead, minutesSince },
+    data: { player, chatHead },
   } = props;
-  const skillsData = Object.entries(player.data.formattedSkills).map(([skill, data]) => ({
+  const skillsData = Object.entries(player.data.skills).map(([skill, data]) => ({
     skill,
     level: data.level > 99 ? 99 : data.level,
     xp: data.xp,
@@ -53,10 +59,6 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
     levelsToday: 0,
     xpToday: 0,
   }));
-
-  const now = new Date();
-  const then = now.setTime(now.getMinutes() - minutesSince);
-  const canRefresh = minutesSince > 5;
 
   // sample quest data. TODO: fill this with real data
   const questData = [
@@ -76,11 +78,11 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <Avatar>
                   <AvatarImage className="p-2" src={chatHead} />
-                  <AvatarFallback>{player.data.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{player.data.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-3xl font-bold truncate">{player.data.name}</h1>
+                <h1 className="text-xl sm:text-3xl font-bold truncate">{player.data.username}</h1>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                   <Badge
                     variant="default"
@@ -92,7 +94,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
+              {/* <fetcher.Form method="get" action={`/api/refresh/${player.data.name}`}>
                 <Tooltip>
                   <TooltipTrigger>
                     <Button
@@ -114,8 +116,8 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                     </p>
                   </TooltipContent>
                 </Tooltip>
-              </fetcher.Form>
-              <FavouriteProfileButton RSN={player.data.name} />
+              </fetcher.Form> */}
+              <FavouriteProfileButton RSN={player.data.username} />
             </div>
           </div>
         </CardHeader>
@@ -144,7 +146,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{props.data.player.data.totalskill}</div>
+                  <div className="text-2xl font-bold">{props.data.player.data.totalSkill}</div>
                   <div className="text-sm text-muted-foreground">Total Level</div>
                 </div>
               </CardContent>
@@ -152,7 +154,7 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{props.data.player.data.totalxp}</div>
+                  <div className="text-2xl font-bold">{props.data.player.data.totalXp}</div>
                   <div className="text-sm text-muted-foreground">Total XP</div>
                 </div>
               </CardContent>
@@ -197,12 +199,12 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
                 <TableBody>
                   {skillsData.map((skill) => {
                     let xpSinceYesterdayRecord: SkillData = { xp: 0, level: 0, rank: 0 };
-                    if (
-                      typeof props.data.xpSinceYesterday === 'object' &&
-                      props.data.xpSinceYesterday !== null
-                    ) {
-                      xpSinceYesterdayRecord = props.data.xpSinceYesterday[skill.skill] ?? {};
-                    }
+                    // if (
+                    //   typeof props.data.xpSinceYesterday === 'object' &&
+                    //   props.data.xpSinceYesterday !== null
+                    // ) {
+                    //   xpSinceYesterdayRecord = props.data.xpSinceYesterday[skill.skill] ?? {};
+                    // }
 
                     return (
                       <TableRow key={skill.skill}>

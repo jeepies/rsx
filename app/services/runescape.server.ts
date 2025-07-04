@@ -88,24 +88,10 @@ export class RunescapeAPI {
     return null;
   }
 
-  static formatSkills(
-    skillvalues: { id: number; level: number; xp: number; rank: number }[],
-  ): Record<string, SkillData> {
-    const formatted: Record<string, SkillData> = {};
-    for (const skill of skillvalues) {
-      const skillName = this.skillIdToNameMap[skill.id];
-      if (skillName) {
-        formatted[skillName] = {
-          level: skill.level,
-          xp: skill.xp,
-          rank: skill.rank,
-        };
-      }
-    }
-    return formatted;
-  }
-
-  static async fetchRuneMetricsProfile(rsn: string): Promise<RuneMetricsProfileFormatted> {
+  /** Return original RuneMetricsProfile, with loggedIn converted to boolean */
+  static async fetchRuneMetricsProfile(
+    rsn: string,
+  ): Promise<Omit<RuneMetricsProfile, 'loggedIn'> & { loggedIn: boolean }> {
     const url = `https://apps.runescape.com/runemetrics/profile/profile?user=${encodeURIComponent(
       rsn,
     )}&activities=20`;
@@ -114,10 +100,10 @@ export class RunescapeAPI {
     const data = (await res.json()) as RuneMetricsProfile;
     if ((data as any).error) throw new Error(`RuneMetrics profile error: ${(data as any).error}`);
 
+    // Convert loggedIn from string to boolean
     return {
       ...data,
       loggedIn: data.loggedIn === 'true',
-      formattedSkills: this.formatSkills(data.skillvalues),
     };
   }
 
