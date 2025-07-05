@@ -69,7 +69,7 @@ export class RuneMetrics {
 
     const player: PlayerData = {
       Username: profile.name,
-      LoggedIn: profile.loggedIn,
+      LoggedIn: profile.loggedIn === 'true',
       Skills: {
         Level: profile.totalskill,
         CombatLevel: profile.combatlevel,
