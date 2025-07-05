@@ -28,11 +28,13 @@ export class RuneMetrics {
           throw new Error(`Unknown skill id: ${id}`);
         }
 
+        const removeLastDigit = (num: number | bigint) => Math.floor(Number(num) / 10);
+
         return {
           JagexID: id,
           HumanName,
           Level: level,
-          XP: BigInt(xp),
+          XP: removeLastDigit(BigInt(xp)),
           Rank: rank,
         };
       },
@@ -70,6 +72,7 @@ export class RuneMetrics {
       LoggedIn: profile.loggedIn,
       Skills: {
         Level: profile.totalskill,
+        CombatLevel: profile.combatlevel,
         XP: profile.totalxp,
         Rank: profile.rank,
         Skills: mappedSkills,
