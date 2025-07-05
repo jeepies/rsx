@@ -10,13 +10,13 @@ export interface Skill {
   /**
    * The players level (virtual)
    */
-  Level: bigint;
+  Level: bigint | number;
   /**
    * The players XP
    */
-  XP: bigint;
+  XP: bigint | number;
   /**
    * The players rank
    */
-  Rank: bigint;
+  Rank: bigint | number;
 }

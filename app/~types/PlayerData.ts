@@ -18,15 +18,15 @@ export interface PlayerData {
     /**
      * Total skill level
      */
-    Level: bigint;
+    Level: bigint | number;
     /**
      * Combat level
      */
-    CombatLevel: bigint;
+    CombatLevel: bigint | number;
     /**
      * Total XP
      */
-    XP: bigint;
+    XP: bigint | number;
     /**
      * Total rank... as a fucking string..?
      */
