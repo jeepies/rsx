@@ -13,6 +13,15 @@ export function toJsonValue<T>(data: T): unknown {
   return JSON.parse(JSON.stringify(data));
 }
 
+export const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export function formatXp(value: number): string {
+  if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + 'B';
+  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+  if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+  return value.toString();
+}
+
 export function sanitizeBigInts(obj: any): any {
   if (typeof obj === 'bigint') {
     return obj.toString();
