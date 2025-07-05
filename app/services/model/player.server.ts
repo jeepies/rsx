@@ -1,11 +1,11 @@
-import { bigintReplacer } from '~/lib/utils';
+import { bigintReplacer, dayNames, formatXp } from '~/lib/utils';
 import config from '../config.server';
 import { prisma } from '../prisma.server';
 import redis from '../redis.server';
 import { TransformedPlayerData, transformPlayerData } from '../transformers/player.server';
 import { RunescapeAPI } from '~/services/runescape.server';
 import { getWithinTimePeriod } from './snapshot.server';
-import { format } from 'date-fns';
+import { format, getDay, parseISO } from 'date-fns';
 import { transformQuestData } from '../transformers/quest.server';
 
 // i sure fucking hope this doesn't change ever....
@@ -367,4 +367,144 @@ export async function getTrackedDaysCount(rsn: string): Promise<number> {
   }
 
   return uniqueDays.size;
+}
+
+export async function getTotalXpPerDayOfWeek(): Promise<{ name: string; xp: number }[]> {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * ONE_DAY_MS);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: {
+      timestamp: {
+        gte: sevenDaysAgo,
+      },
+    },
+    select: {
+      playerId: true,
+      timestamp: true,
+      totalXp: true,
+    },
+  });
+
+  const playerDayXp: Record<string, Record<string, bigint>> = {};
+
+  for (const snap of snapshots) {
+    const dayKey = format(snap.timestamp, 'yyyy-MM-dd');
+    if (!playerDayXp[snap.playerId]) playerDayXp[snap.playerId] = {};
+    playerDayXp[snap.playerId][dayKey] = snap.totalXp;
+  }
+
+  const allDays = Array.from(
+    new Set(snapshots.map((s) => format(s.timestamp, 'yyyy-MM-dd'))),
+  ).sort();
+
+  const totalXpPerDay: Record<string, bigint> = {};
+
+  for (let i = 1; i < allDays.length; i++) {
+    const today = allDays[i];
+    const yesterday = allDays[i - 1];
+
+    let totalGainForDay = 0n;
+
+    for (const playerId in playerDayXp) {
+      const todayXp = playerDayXp[playerId][today];
+      const yesterdayXp = playerDayXp[playerId][yesterday];
+
+      if (todayXp !== undefined && yesterdayXp !== undefined) {
+        const gain = todayXp > yesterdayXp ? todayXp - yesterdayXp : 0n;
+        totalGainForDay += gain;
+      }
+    }
+
+    totalXpPerDay[today] = totalGainForDay;
+  }
+
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * ONE_DAY_MS);
+    last7Days.push(format(d, 'yyyy-MM-dd'));
+  }
+
+  const result = last7Days.map((dateStr) => {
+    const dateObj = parseISO(dateStr);
+    const dayName = dayNames[dateObj.getDay()];
+    const xpBigint = totalXpPerDay[dateStr] ?? 0n;
+
+    const xp = Number(xpBigint > 9007199254740991n ? 9007199254740991n : xpBigint);
+
+    return {
+      name: dayName,
+      xp,
+    };
+  });
+
+  return result;
+}
+
+export async function getTopXpGainersToday(limit = 10) {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrowStart = new Date(todayStart.getTime() + ONE_DAY_MS);
+  async function getLatestSnapshotsBefore(timestamp: Date) {
+    const snaps = await prisma.playerSnapshot.findMany({
+      where: {
+        timestamp: {
+          lte: timestamp,
+        },
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+      select: {
+        playerId: true,
+        timestamp: true,
+        totalXp: true,
+        player: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
+    const latestMap = new Map<string, (typeof snaps)[0]>();
+    for (const snap of snaps) {
+      if (!latestMap.has(snap.playerId)) {
+        latestMap.set(snap.playerId, snap);
+      }
+    }
+    return latestMap;
+  }
+
+  const yesterdaySnaps = await getLatestSnapshotsBefore(todayStart);
+  const todaySnaps = await getLatestSnapshotsBefore(tomorrowStart);
+
+  const playersData: {
+    player: string;
+    xpTotal: number;
+    xpGained: number;
+  }[] = [];
+
+  for (const [playerId, todaySnap] of todaySnaps.entries()) {
+    const yesterdaySnap = yesterdaySnaps.get(playerId);
+    if (!yesterdaySnap) continue;
+    const gained = Number(todaySnap.totalXp) - Number(yesterdaySnap.totalXp);
+    if (gained <= 0) continue;
+    playersData.push({
+      player: todaySnap.player.username,
+      xpTotal: Number(todaySnap.totalXp),
+      xpGained: gained,
+    });
+  }
+
+  playersData.sort((a, b) => b.xpGained - a.xpGained);
+
+  const result = playersData.slice(0, limit).map((p, i) => ({
+    rank: i + 1,
+    player: p.player,
+    xp: formatXp(p.xpTotal),
+    gained: formatXp(p.xpGained),
+  }));
+
+  return result;
 }

@@ -1,21 +1,40 @@
-import { useLoaderData } from '@remix-run/react';
-import { Activity, Gift, TrendingUp, Users } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { prisma } from '~/services/prisma.server';
+import { Users, Activity, TrendingUp, Gift, Zap, PieChart, Crown } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  Pie,
+} from 'recharts';
+import { useLoaderData } from '@remix-run/react';
+import { getTopXpGainersToday, getTotalXpPerDayOfWeek } from '~/services/model/player.server';
 import { getTrackedPlayerStats } from '~/services/stats.server';
 
 export async function loader() {
   const playerStats = await getTrackedPlayerStats();
 
-  return { playerStats };
+  const xpTrends = await getTotalXpPerDayOfWeek();
+  const topEarners = await getTopXpGainersToday();
+
+  return { playerStats, xpTrends, topEarners };
 }
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
 
   const stats = [
-    { title: 'Total Players Tracked', value: data.playerStats.totalTrackedPlayers, icon: Users, change: `${Number(data.playerStats.percentageIncrease).toFixed(0)}%` },
+    {
+      title: 'Total Players Tracked',
+      value: data.playerStats.totalTrackedPlayers,
+      icon: Users,
+      change: `${Number(data.playerStats.percentageIncrease).toFixed(0)}%`,
+    },
     { title: 'Active Sessions', value: '0', icon: Activity, change: '0%' },
     { title: 'XP Gained Today', value: '0', icon: TrendingUp, change: '0%' },
     { title: 'Drops Today', value: '0', icon: Gift, change: '0%' },
@@ -53,6 +72,96 @@ export default function Index() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Weekly XP Trends
+            </CardTitle>
+            <CardDescription>Total XP gained across all tracked players</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.xpTrends}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="name" stroke="#9CA3AF" />
+                <YAxis
+                  stroke="#9CA3AF"
+                  tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                  formatter={(value) => [
+                    `${(Number(value) / 1000000).toFixed(1)}M XP`,
+                    'XP Gained',
+                  ]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="xp"
+                  stroke="#a29bfe"
+                  strokeWidth={3}
+                  dot={{ fill: '#a29bfe' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              Top XP Gainers Today
+            </CardTitle>
+            <CardDescription>
+              Players with the highest XP gains in the last 24 hours
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {data.topEarners.length === 0 ? (
+                <div className="flex justify-center items-center">
+                  <span className="text-muted-foreground">No tracked players</span>
+                </div>
+              ) : (
+                data.topEarners.map((player, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-smooth"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          player.rank === 1
+                            ? 'bg-yellow-500 text-black'
+                            : player.rank === 2
+                              ? 'bg-gray-400 text-white'
+                              : player.rank === 3
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {player.rank}
+                      </div>
+                      <div>
+                        <div className="font-medium">{player.player}</div>
+                        <div className="text-sm text-muted-foreground">Total: {player.xp}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-primary">+{player.gained}</div>
+                      <div className="text-xs text-muted-foreground">XP gained</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
