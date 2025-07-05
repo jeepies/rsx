@@ -102,4 +102,5 @@ enum SkillName {
   Divination
   Invention
   Archaeology
+  Necromancy
 }

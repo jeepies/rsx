@@ -74,19 +74,59 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
   const {
     data: { player, chatHead },
   } = props;
-  const skillsData = Object.entries(player.data.skills).map(([skill, data]) => {
+
+  const skillOrder: string[] = [
+    'Attack',
+    'Defence',
+    'Strength',
+    'Constitution',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Cooking',
+    'Woodcutting',
+    'Fletching',
+    'Fishing',
+    'Firemaking',
+    'Crafting',
+    'Smithing',
+    'Mining',
+    'Herblore',
+    'Agility',
+    'Thieving',
+    'Slayer',
+    'Farming',
+    'Runecrafting',
+    'Hunter',
+    'Construction',
+    'Summoning',
+    'Dungeoneering',
+    'Divination',
+    'Invention',
+    'Archaeology',
+    'Necromancy',
+  ];
+
+  const skillsData = skillOrder.map((skill) => {
+    const data = player.data.skills[skill];
+    if (!data) {
+      return {
+        skill,
+        level: 0,
+        xp: 0,
+        virtual: 0,
+        levelsTodayForSkill: 0,
+        xpTodayForSkill: 0,
+      };
+    }
     const skillKey = skill.toLowerCase();
-
-    const levelsTodayForSkill = player.dailyLevelIncreases?.[skillKey] ?? 0;
-    const xpTodayForSkill = player.dailyXpIncreases?.[skillKey] ?? 0;
-
     return {
       skill,
       level: data.level > 99 ? 99 : data.level,
       xp: data.xp,
       virtual: data.level,
-      levelsTodayForSkill,
-      xpTodayForSkill,
+      levelsTodayForSkill: player.dailyLevelIncreases?.[skillKey] ?? 0,
+      xpTodayForSkill: player.dailyXpIncreases?.[skillKey] ?? 0,
     };
   });
 

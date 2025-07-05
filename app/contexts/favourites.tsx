@@ -12,6 +12,7 @@ const FavouritesContext = createContext<FavouritesContextType | undefined>(undef
 
 export function FavouritesProvider({ children }: { children: React.ReactNode }) {
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -22,15 +23,18 @@ export function FavouritesProvider({ children }: { children: React.ReactNode }) 
         localStorage.removeItem(STORAGE_KEY);
       }
     }
+    setInitialized(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(favourites));
-  }, [favourites]);
+    if (initialized) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favourites));
+    }
+  }, [favourites, initialized]);
 
   function addFavourite(RSN: string) {
     setFavourites((prev) => {
-      if (prev.some((p) => p === RSN)) return prev;
+      if (prev.includes(RSN)) return prev;
       return [...prev, RSN];
     });
   }

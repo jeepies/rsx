@@ -30,6 +30,7 @@ const skillIdToNameMap: Record<number, SkillName> = {
   25: 'Divination',
   26: 'Invention',
   27: 'Archaeology',
+  28: 'Necromancy',
 };
 
 export interface SkillData {

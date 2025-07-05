@@ -82,15 +82,20 @@ export default function DashboardTopbar() {
                 {recentSearches.map((search, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between px-2 py-2 hover:bg-muted rounded-sm cursor-pointer group"
-                    onClick={() => handleSearch(search)}
+                    className="flex items-center justify-between px-2 py-2 hover:bg-muted rounded-sm group"
                   >
-                    <span className="text-sm flex-1">{search}</span>
+                    <span
+                      className="text-sm flex-1 cursor-pointer"
+                      onClick={() => handleSearch(search)}
+                    >
+                      {search}
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleDelete(search);
                       }}
