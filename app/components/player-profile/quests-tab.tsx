@@ -142,7 +142,14 @@ export function QuestsTab({ questData, questsList }: QuestsTabProps) {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(quest.status)}
-                      {quest.name}
+                      <a
+                        href={`https://runescape.wiki/w/${quest.name.replace(/\s+/g, '_')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {quest.name}
+                      </a>
                     </div>
                   </TableCell>
                   <TableCell>
