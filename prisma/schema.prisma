@@ -29,12 +29,15 @@ model PlayerSnapshot {
   combatLevel BigInt
   loggedIn    Boolean
 
+  quests_completed   Int
+  quests_in_progress Int
+  quests_not_started Int
+
   playerId String
   player   Player @relation(fields: [playerId], references: [id])
 
-  skills     SkillSnapshot[]
-  activities ActivitySnapshot[]
-  quests     QuestSnapshot[]
+  skills SkillSnapshot[]
+  quests QuestSnapshot[]
 
   @@index([playerId, timestamp])
 }
@@ -48,16 +51,6 @@ model SkillSnapshot {
   xp    BigInt
   rank  BigInt
   level BigInt
-}
-
-model ActivitySnapshot {
-  id         String         @id @default(cuid())
-  snapshot   PlayerSnapshot @relation(fields: [snapshotId], references: [id])
-  snapshotId String
-
-  date    DateTime
-  text    String
-  details String
 }
 
 model QuestSnapshot {
