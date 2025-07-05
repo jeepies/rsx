@@ -18,7 +18,11 @@ export interface PlayerData {
     /**
      * Total skill level
      */
-    Level: number;
+    Level: bigint;
+    /**
+     * Combat level
+     */
+    CombatLevel: bigint;
     /**
      * Total XP
      */
@@ -54,4 +58,11 @@ export interface PlayerData {
      */
     Quests: Quest[];
   };
+}
+
+export interface CachedPlayerData extends PlayerData {
+  /**
+   * When the data was added to the cache
+   */
+  CachedAt: number;
 }
