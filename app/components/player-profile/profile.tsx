@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { RefreshCw, TrendingUp } from 'lucide-react';
+import { Calendar, RefreshCw, Star, Target, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '../ui/table';
@@ -57,6 +57,7 @@ export interface ProfileProps {
         completedQuests: RawQuest[];
         allQuests: RawQuest[];
       };
+      trackedDays: number;
     };
     chatHead: string;
   };
@@ -98,6 +99,9 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
 
   const questsList = translateQuests(player.quests);
 
+  let questPoints = 0;
+  player.quests.completedQuests.forEach((q) => (questPoints += q.questPoints));
+
   const questDataMap = new Map<string, { completed: number; total: number }>();
   for (const quest of questsList) {
     const { category, status } = quest;
@@ -110,11 +114,18 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
       entry.completed += 1;
     }
   }
+
   const questData: QuestData[] = Array.from(questDataMap.entries()).map(([category, data]) => ({
     category,
     completed: data.completed,
     total: data.total,
   }));
+
+  const maxCapeRequiredSkillsCount = Object.keys(player.data.skills).length;
+  const maxCapeSkillsAt99 = Object.values(player.data.skills).filter(
+    (skill) => skill.level >= 99,
+  ).length;
+  const maxCapeProgressPercent = (maxCapeSkillsAt99 / maxCapeRequiredSkillsCount) * 100;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -185,6 +196,57 @@ export default function PlayerProfile(props: Readonly<ProfileProps>) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <Users className="h-5 w-5 mx-auto mb-2 text-primary" />
+                  <div className="text-lg font-bold">N/A</div>
+                  <div className="text-xs text-muted-foreground">Clan</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <Trophy className="h-5 w-5 mx-auto mb-2 text-yellow-500" />
+                  <div className="text-lg font-bold">{formatBigInt(player.data.totalSkill)}</div>
+                  <div className="text-xs text-muted-foreground">Total Level</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <Target className="h-5 w-5 mx-auto mb-2 text-green-500" />
+                  <div className="text-lg font-bold"> {maxCapeProgressPercent.toFixed(1)}%</div>
+                  <div className="text-xs text-muted-foreground">Max Cape</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <Calendar className="h-5 w-5 mx-auto mb-2 text-blue-500" />
+                  <div className="text-lg font-bold">{formatBigInt(player.trackedDays)}</div>
+                  <div className="text-xs text-muted-foreground">Days Tracked</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <Star className="h-5 w-5 mx-auto mb-2 text-purple-500" />
+                  <div className="text-lg font-bold">{questPoints}</div>
+                  <div className="text-xs text-muted-foreground">Quest Points</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">

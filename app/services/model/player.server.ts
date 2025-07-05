@@ -344,3 +344,27 @@ export async function getDailyXPForWeek(rsn: string): Promise<{ date: string; da
   }
   return xpData;
 }
+
+export async function getTrackedDaysCount(rsn: string): Promise<number> {
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: {
+      player: {
+        username: rsn,
+      },
+    },
+    select: {
+      timestamp: true,
+    },
+    orderBy: {
+      timestamp: 'asc',
+    },
+  });
+
+  const uniqueDays = new Set<string>();
+  for (const snap of snapshots) {
+    const day = format(snap.timestamp, 'yyyy-MM-dd');
+    uniqueDays.add(day);
+  }
+
+  return uniqueDays.size;
+}
