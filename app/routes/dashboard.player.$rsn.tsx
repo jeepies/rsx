@@ -20,6 +20,7 @@ import {
   getDailyXpIncreases,
   getFreshestData,
   getRefreshTimestamp,
+  getTrackedDaysCount,
 } from '~/services/model/player.server';
 import { prisma } from '~/services/prisma.server';
 import {
@@ -59,6 +60,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     eligibleQuests,
     completedQuests,
     allQuests,
+    trackedDays
   ] = await Promise.all([
     getDailyXpIncreases(rsn),
     getDailyXPForWeek(rsn),
@@ -68,6 +70,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     getEligibleQuests(rsn),
     getQuestsByStatus(rsn, 'COMPLETED'),
     getAllQuestsForUser(rsn),
+    getTrackedDaysCount(rsn),
   ]);
 
   const elapsed = Date.now() - start;
@@ -95,7 +98,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
         eligibleQuests,
         completedQuests,
         allQuests,
-      }
+      },
+      trackedDays,
     },
     chatHead: RunescapeAPI.getChatheadUrl(rsn),
   };
