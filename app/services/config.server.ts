@@ -3,6 +3,9 @@ import 'dotenv/config';
 interface Config {
   ENVIRONMENT: string;
   REDIS_URL: string;
+  /**
+   * Everything should be in ms
+   */
   TIMINGS: {
     FETCH_LOCK: number;
     AUTO_REFRESH: number;
@@ -18,7 +21,7 @@ const config: Config = {
     FETCH_LOCK: Number(process.env.FETCH_LOCK) || 30000,
     AUTO_REFRESH: Number(process.env.AUTO_REFRESH) || 900000,
     MANUAL_REFRESH: Number(process.env.MANUAL_REFRESH) || 300000,
-    MIN_SKELETON_TIME: Number(process.env.MIN_SKELETON_TIME) || 400
+    MIN_SKELETON_TIME: Number(process.env.MIN_SKELETON_TIME) || 400,
   },
 };
 
