@@ -31,3 +31,7 @@ export const SkillMap: Record<number, SkillName> = {
   27: 'Archaeology',
   28: 'Necromancy',
 };
+
+export const IdMap: Record<SkillName, number> = Object.fromEntries(
+  Object.entries(SkillMap).map(([id, name]) => [name, Number(id)]),
+) as Record<SkillName, number>;
