@@ -3,26 +3,24 @@ import Backend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-if (!i18n.isInitialized) {
-  i18n
-    .use(Backend)
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      fallbackLng: 'en',
-      ns: ['common'],
-      defaultNS: 'common',
-      backend: {
-        loadPath: '/locales/{{lng}}/{{ns}}.json',
-      },
-      interpolation: {
-        escapeValue: false,
-      },
-      detection: {
-        order: ['querystring', 'cookie', 'localStorage', 'navigator'],
-        caches: ['cookie'],
-      },
-    });
-}
+i18n
+  .use(Backend)
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    fallbackLng: 'en',
+    debug: false,
+    ns: ['translation'],
+    defaultNS: 'translation',
+    backend: {
+      loadPath: '/locales/{{lng}}.json',
+    },
+    interpolation: {
+      escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
+    },
+  });
 
 export default i18n;

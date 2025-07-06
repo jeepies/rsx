@@ -1,0 +1,11 @@
+{
+    "human_name": "Español",
+    "code": "ES",
+    "sidebar": {
+      "home": "Página principal",
+      "players": "Jugadores",
+      "leaderboards": "Clasificación",
+      "favourites": "Favoritos"
+    }
+  }
+  

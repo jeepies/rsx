@@ -1,0 +1,10 @@
+{
+  "human_name": "English",
+  "code": "EN",
+  "sidebar": {
+    "home": "Home",
+    "players": "Players",
+    "leaderboards": "Leaderboards",
+    "favourites": "Favourites"
+  }
+}
