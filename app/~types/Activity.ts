@@ -28,4 +28,6 @@ export enum ActivityType {
   KILL,
   QUEST,
   LEVEL_UP,
+  CLAN,
+  TREASURE_TRAIL,
 }
