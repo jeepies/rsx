@@ -102,3 +102,19 @@ export class RuneMetrics {
     return `https://secure.runescape.com/m=avatar-rs/${encodeURIComponent(username)}/chat.png`;
   }
 }
+
+export class Runescape {
+  private static BASE_URL = 'https://secure.runescape.com';
+
+  static async getPlayerClanName(username: string) {
+    const url =
+      this.BASE_URL +
+      `/m=website-data/playerDetails.ws?names=%5B%22${encodeURIComponent(username)}%22%5D&callback=jQuery000000000000000_0000000000&_=0`;
+
+    const result = await fetch(url);
+    const clan = JSON.parse(
+      (await result.text()).replace('jQuery000000000000000_0000000000(', '').replace(');', ''),
+    )[0].clan;
+    return clan;
+  }
+}

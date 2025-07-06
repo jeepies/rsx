@@ -16,11 +16,12 @@ export interface OverviewTabProps {
   data: {
     player: PlayerData;
     stats: any;
+    clan: any;
   };
 }
 
 export default function OverviewTab(props: Readonly<OverviewTabProps>) {
-  const { player, stats } = props.data;
+  const { player, stats, clan } = props.data;
 
   let questPoints = 0;
   player.Quests.Quests.filter((q) => q.Status === 'COMPLETED').forEach(
@@ -40,7 +41,7 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
           <CardContent className="p-4">
             <div className="text-center">
               <Users className="h-5 w-5 mx-auto mb-2 text-primary" />
-              <div className="text-lg font-bold">N/A</div>
+              <div className="text-lg font-bold">{clan.clanName}</div>
               <div className="text-xs text-muted-foreground">Clan</div>
             </div>
           </CardContent>
