@@ -2,7 +2,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { TooltipTrigger, TooltipContent } from '@radix-ui/react-tooltip';
 import { useFetcher } from '@remix-run/react';
 import { RefreshCw } from 'lucide-react';
-import FavouriteProfileButton from '~/components/player-profile/favourite-button';
+import FavouriteProfileButton from './favourite-button';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader } from '~/components/ui/card';
