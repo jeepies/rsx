@@ -2,9 +2,8 @@ import config from '~/services/config.server';
 import { prisma } from '~/services/prisma.server';
 import redis from '~/services/redis.server';
 import { RuneMetrics } from '~/services/runescape.server';
-import { IdMap, SkillMap } from '~/~constants/SkillMap';
+import { IdMap } from '~/~constants/SkillMap';
 import { CachedPlayerData, PlayerData } from '~/~types/PlayerData';
-import { Skill } from '~/~types/Skill';
 
 function getRedisKey(username: string): string {
   return `rsn:lock:${username}`;
@@ -15,17 +14,14 @@ function getCacheKey(username: string): string {
 }
 
 export async function canRefresh(username: string): Promise<boolean> {
+  // check if there is a lock for this username in redis
   const isLocked = await redis.get(getRedisKey(username));
   return !isLocked;
 }
 
-export async function getRefreshTimestamp(rsn: string) {
-  const timestamp = await redis.expireTime(getRedisKey(rsn));
-  return timestamp;
-}
-
-export async function commitLock(rsn: string): Promise<void> {
-  await redis.set(getRedisKey(rsn), '1', {
+export async function commitLock(username: string): Promise<void> {
+  // set a lock key in redis with expiry to prevent concurrent refreshes
+  await redis.set(getRedisKey(username), '1', {
     expiration: { type: 'PX', value: config.TIMINGS.FETCH_LOCK },
   });
 }
@@ -33,37 +29,50 @@ export async function commitLock(rsn: string): Promise<void> {
 export async function getFreshestData(username: string) {
   const cacheKey = getCacheKey(username);
 
+  // try to get cached data from redis
   const cachedRaw = await redis.get(cacheKey);
   if (cachedRaw) {
     try {
-      const cached: CachedPlayerData = JSON.parse(cachedRaw);
+      const cached = JSON.parse(cachedRaw) as {
+        data: PlayerData | string;
+        fetchedAt: number;
+      };
       const now = Date.now();
-      if (cached.CachedAt + config.TIMINGS.AUTO_REFRESH > now) {
-        const { CachedAt, ...transformed } = cached;
-        return transformed;
+      // if cached data is still fresh, return it
+      if (cached.fetchedAt + config.TIMINGS.AUTO_REFRESH > now) {
+        return cached.data;
       }
     } catch {
-      // this data is shit. lets just carry on.
+      // corrupted cache data, just ignore and continue
     }
   }
 
+  // ensure player exists in database or create new
   const playerRow = await prisma.player.upsert({
-    where: { username: username },
+    where: { username },
     update: {},
     create: {
-      username: username,
+      username,
       lastFetchedAt: new Date(),
     },
   });
 
+  // only proceed if no lock exists for this username
   if (await canRefresh(username)) {
+    // commit a lock to prevent other refreshes during this operation
     await commitLock(username);
 
     try {
+      // fetch fresh profile data from RuneMetrics
       const data = await RuneMetrics.getFullProfile(username);
 
-      if (typeof data === 'string') return data;
+      // if RuneMetrics returns a string (likely an error), release lock and return it
+      if (typeof data === 'string') {
+        await redis.del(getRedisKey(username));
+        return data;
+      }
 
+      // create a new snapshot in the database for this fresh data
       await prisma.playerSnapshot.create({
         data: {
           playerId: playerRow.id,
@@ -97,15 +106,13 @@ export async function getFreshestData(username: string) {
         },
       });
 
+      // update player's last fetched timestamp
       await prisma.player.update({
-        where: {
-          id: playerRow.id,
-        },
-        data: {
-          lastFetchedAt: new Date(),
-        },
+        where: { id: playerRow.id },
+        data: { lastFetchedAt: new Date() },
       });
 
+      // cache fresh data in redis with expiry for auto-refresh window
       await redis.set(
         cacheKey,
         JSON.stringify({
@@ -120,25 +127,23 @@ export async function getFreshestData(username: string) {
         },
       );
 
+      // release the redis lock now that refresh is complete
+      await redis.del(getRedisKey(username));
+
       return data;
     } catch {
-      // this data is also wank.
+      // on any error during refresh, release the lock to avoid deadlock
+      await redis.del(getRedisKey(username));
     }
 
+    // if fetching fresh data failed, try to return the latest snapshot from the DB
     const playerWithSnapshots = await prisma.player.findUnique({
-      where: {
-        username: username,
-      },
+      where: { username },
       include: {
         snapshots: {
-          orderBy: {
-            timestamp: 'desc',
-          },
+          orderBy: { timestamp: 'desc' },
           take: 1,
-          include: {
-            skills: true,
-            quests: true,
-          },
+          include: { skills: true, quests: true },
         },
       },
     });
@@ -146,6 +151,7 @@ export async function getFreshestData(username: string) {
     if (playerWithSnapshots && playerWithSnapshots.snapshots.length) {
       const latest = playerWithSnapshots.snapshots[0];
 
+      // reconstruct PlayerData shape from latest snapshot DB data
       const player: PlayerData = {
         Username: playerWithSnapshots.username,
         LoggedIn: latest.loggedIn,
@@ -180,8 +186,8 @@ export async function getFreshestData(username: string) {
       return player;
     }
 
-    // oh fuck.
-    const fallbackPlayer: PlayerData = {
+    // if no snapshot found, return a fallback empty player data
+    return {
       Username: playerRow.username,
       LoggedIn: false,
       Skills: {
@@ -198,6 +204,35 @@ export async function getFreshestData(username: string) {
         Quests: [],
       },
     };
-    return fallbackPlayer;
   }
+
+  // if can't refresh due to lock, try returning cached data anyway to avoid empty responses
+  const cachedRawFallback = await redis.get(cacheKey);
+  if (cachedRawFallback) {
+    try {
+      const cached = JSON.parse(cachedRawFallback);
+      return cached.data;
+    } catch {
+      // corrupted cache, ignore
+    }
+  }
+
+  // final fallback empty player if nothing else works
+  return {
+    Username: username,
+    LoggedIn: false,
+    Skills: {
+      Level: 0n,
+      CombatLevel: 0n,
+      XP: 0n,
+      Rank: '',
+      Skills: [],
+    },
+    Quests: {
+      Completed: 0,
+      InProgress: 0,
+      NotStarted: 0,
+      Quests: [],
+    },
+  };
 }
