@@ -1,4 +1,5 @@
 import { Users, Trophy, Target, Calendar, Star, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -22,6 +23,7 @@ export interface OverviewTabProps {
 
 export default function OverviewTab(props: Readonly<OverviewTabProps>) {
   const { player, stats, clan } = props.data;
+  const { t } = useTranslation();
 
   let questPoints = 0;
   player.Quests.Quests.filter((q) => q.Status === 'COMPLETED').forEach(
@@ -42,7 +44,9 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
             <div className="text-center">
               <Users className="h-5 w-5 mx-auto mb-2 text-primary" />
               <div className="text-lg font-bold">{clan.clanName}</div>
-              <div className="text-xs text-muted-foreground">Clan</div>
+              <div className="text-xs text-muted-foreground">
+                {t('pages.player_profile.tabs.overview.clan')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -52,7 +56,9 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
             <div className="text-center">
               <Trophy className="h-5 w-5 mx-auto mb-2 text-yellow-500" />
               <div className="text-lg font-bold">{formatBigInt(Number(player.Skills.Level))}</div>
-              <div className="text-xs text-muted-foreground">Total Level</div>
+              <div className="text-xs text-muted-foreground">
+                {t('pages.player_profile.total_level')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -62,7 +68,9 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
             <div className="text-center">
               <Target className="h-5 w-5 mx-auto mb-2 text-green-500" />
               <div className="text-lg font-bold"> {maxCapeProgressPercent.toFixed(1)}%</div>
-              <div className="text-xs text-muted-foreground">Max Cape</div>
+              <div className="text-xs text-muted-foreground">
+                {t('pages.player_profile.tabs.overview.max_cape')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -72,7 +80,9 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
             <div className="text-center">
               <Calendar className="h-5 w-5 mx-auto mb-2 text-blue-500" />
               <div className="text-lg font-bold">{stats.daysTracked}</div>
-              <div className="text-xs text-muted-foreground">Days Tracked</div>
+              <div className="text-xs text-muted-foreground">
+                {t('pages.player_profile.tabs.overview.days_tracked')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -82,7 +92,9 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
             <div className="text-center">
               <Star className="h-5 w-5 mx-auto mb-2 text-purple-500" />
               <div className="text-lg font-bold">{questPoints}</div>
-              <div className="text-xs text-muted-foreground">Quest Points</div>
+              <div className="text-xs text-muted-foreground">
+                {t('pages.player_profile.tabs.overview.quest_points')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -91,10 +103,10 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            Daily XP Progress
+            {t('pages.player_profile.tabs.overview.daily_xp.title')}
           </CardTitle>
           <CardDescription className="text-sm">
-            Daily experience gained over the last 7 days
+          {t('pages.player_profile.tabs.overview.daily_xp.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>

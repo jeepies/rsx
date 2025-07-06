@@ -1,5 +1,6 @@
 import { CheckCircle, Minus, XCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '~/components/ui/card';
@@ -34,6 +35,7 @@ export interface QuestTabProps {
 
 export default function QuestsTab(props: Readonly<QuestTabProps>) {
   const { player } = props.data;
+  const { t } = useTranslation();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -101,7 +103,7 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Quest Progress</CardTitle>
+            <CardTitle>{t('pages.player_profile.tabs.quests.quest_progress')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -121,14 +123,18 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Quest Statistics</CardTitle>
+            <CardTitle>{t('pages.player_profile.tabs.quests.quest_statistics')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 sm:space-y-4">
               {questStats.map((category) => (
                 <div key={category.category} className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>{category.category}</span>
+                    <span>
+                      {t(
+                        `pages.player_profile.tabs.quests.quest_types.${category.category.toLowerCase()}`,
+                      )}
+                    </span>
                     <span>
                       {category.completed}/{category.total}
                     </span>
@@ -142,15 +148,15 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>All Quests</CardTitle>
+          <CardTitle>{t('pages.player_profile.tabs.quests.table.title')}</CardTitle>
           <CardDescription>
-            Complete list of quests with quest points and completion status
+            {t('pages.player_profile.tabs.quests.table.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-4 items-start sm:items-end">
             <Input
-              placeholder="Search quests..."
+              placeholder={t('pages.player_profile.tabs.quests.table.search_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full sm:w-1/3"
@@ -164,7 +170,7 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
                 <SelectItem value="All">All Difficulties</SelectItem>
                 {Object.values(DifficultyLabels).map((label) => (
                   <SelectItem key={label} value={label}>
-                    {label}
+                    {t(`pages.player_profile.tabs.quests.quest_types.${label.toLowerCase()}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -172,17 +178,27 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
 
             <div className="flex items-center space-x-2">
               <Switch checked={eligibleOnly} onCheckedChange={setEligibleOnly} />
-              <span>Eligible Only</span>
+              <span>{t(`pages.player_profile.tabs.quests.table.eligible_only`)}</span>
             </div>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Quest Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-center">Quest Points</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Requirements</TableHead>
+                <TableHead>
+                  {t(`pages.player_profile.tabs.quests.table.headers.quest_name`)}
+                </TableHead>
+                <TableHead>
+                  {t(`pages.player_profile.tabs.quests.table.headers.category`)}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t(`pages.player_profile.tabs.quests.table.headers.quest_points`)}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t(`pages.player_profile.tabs.quests.table.headers.status`)}
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  {t(`pages.player_profile.tabs.quests.table.headers.requirements`)}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

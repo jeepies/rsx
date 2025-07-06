@@ -27,6 +27,7 @@ import SkillTab from './tabs/skills';
 import QuestsTab from './tabs/quests';
 import { useState, useRef, useEffect } from 'react';
 import { PlayerProfileSkeleton } from './skeleton';
+import { useTranslation } from 'react-i18next';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
@@ -50,7 +51,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     getTrackedDaysByUsername(rsn),
   ]);
 
-  const clanName = (await Runescape.getPlayerClanName(rsn)) ?? "N/A";
+  const clanName = (await Runescape.getPlayerClanName(rsn)) ?? 'N/A';
 
   return {
     player,
@@ -61,7 +62,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       daysTracked,
     },
     clan: {
-      clanName
+      clanName,
     },
     meta,
     chatheadURI: RuneMetrics.getChatheadURI(rsn),
@@ -69,6 +70,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function PlayerProfile() {
+  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
   const params = useParams();
   const navigation = useNavigation();
@@ -108,13 +110,13 @@ export default function PlayerProfile() {
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 h-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">
-            Overview
+            {t("pages.player_profile.tabs.overview.name")}
           </TabsTrigger>
           <TabsTrigger value="skills" className="text-xs sm:text-sm py-2">
-            Skills
+          {t("pages.player_profile.tabs.skills.name")}
           </TabsTrigger>
           <TabsTrigger value="quests" className="text-xs sm:text-sm py-2">
-            Quests
+          {t("pages.player_profile.tabs.quests.name")}
           </TabsTrigger>
         </TabsList>
 
