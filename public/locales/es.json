@@ -1,11 +1,36 @@
 {
-    "human_name": "Español",
-    "code": "ES",
-    "sidebar": {
-      "home": "Página principal",
-      "players": "Jugadores",
-      "leaderboards": "Clasificación",
-      "favourites": "Favoritos"
+  "human_name": "Español",
+  "code": "ES",
+  "misc": {
+    "total": "Total",
+    "xp_gained": "XP Ganada"
+  },
+  "sidebar": {
+    "home": "Página Principal",
+    "players": "Jugadores",
+    "leaderboards": "Clasificación",
+    "favourites": "Favoritos"
+  },
+  "pages": {
+    "home": {
+      "welcome": "Bienvenido a Nexus",
+      "motto": "Tu servicio de análisis y kit de herramientas de RuneScape 3",
+      "total_players_tracked": "Total de Jugadores Analizados",
+      "active_session": "Sesiones Activas",
+      "xp_today": "XP Ganada Hoy",
+      "drops_today": "Drops Hoy",
+      "weekly_xp_trends": {
+        "title": "Tendencias semanales de XP",
+        "description": "Total de XP de todos los jugadores analizados"
+      },
+      "skill_pie_chart": {
+        "title": "Categoría de distribución de habilidades",
+        "description": "Habilidades mas populares siendo entrenadas"
+      },
+      "top_earners": {
+        "title": "Top XP Hoy",
+        "description": "Jugadores con la mayor ganancia de experiencia en las últimas 24 horas"
+      }
     }
   }
-  
+}
