@@ -71,8 +71,6 @@ export function QuestsTab({ questData, questsList }: QuestsTabProps) {
     return order.indexOf(a.category) - order.indexOf(b.category);
   });
 
-  console.log(questData);
-
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
