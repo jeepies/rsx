@@ -542,7 +542,6 @@ export async function getTotalTrackedPlayers() {
   const now = new Date();
   const todayStart = new Date(now.setHours(0, 0, 0, 0));
   const yesterdayStart = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
-  const dayBeforeYesterdayStart = new Date(yesterdayStart.getTime() - 24 * 60 * 60 * 1000);
 
   const [todayCount, yesterdayCount] = await Promise.all([
     prisma.player.count({
@@ -562,7 +561,7 @@ export async function getTotalTrackedPlayers() {
     }),
   ]);
 
-  const value = todayCount.toString();
+  const value = await prisma.player.count();
   const percentage =
     yesterdayCount === 0 ? 100 : ((todayCount - yesterdayCount) / yesterdayCount) * 100;
 
