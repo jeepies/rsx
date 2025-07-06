@@ -33,63 +33,63 @@
       }
     },
     "player_profile": {
-      "refresh": "Refresh",
-      "favourited": "Favourited",
-      "favourite": "Favourite",
+      "refresh": "Actualizar",
+      "favourited": "Favoritos",
+      "favourite": "Favorito",
       "online": "Online",
       "offline": "Offline",
-      "total_level": "Total Level",
+      "total_level": "Nivel Total",
       "tabs": {
         "overview": {
-          "name": "Overview",
+          "name": "Vista General",
           "clan": "Clan",
           "max_cape": "Max Cape",
-          "days_tracked": "Days Tracked",
-          "quest_points": "Quest Points",
+          "days_tracked": "Días en seguimiento",
+          "quest_points": "Puntos de Misión",
           "daily_xp": {
-            "title": "Daily XP Progress",
-            "description": "Daily experience gained over the last 7 days"
+            "title": "Progreso de XP Diario",
+            "description": "Experiencia Diaria Ganada en los últimos 7 Días"
           }
         },
         "skills": {
-          "name": "Skills",
-          "total_xp": "Total XP",
-          "levels_today": "Levels Today",
-          "xp_today": "XP Today",
+          "name": "Habilidades",
+          "total_xp": "XP Total",
+          "levels_today": "Niveles Hoy",
+          "xp_today": "XP Hoy",
           "table": {
-            "title": "Skill Details",
-            "description": "Detailed breakdown of all skill levels and experience",
+            "title": "Detalles de Habilidades",
+            "description": "Vista detallada de todos los niveles y experiencia de las habilidades",
             "headers": {
-              "skill": "Skill",
-              "level": "Level",
+              "skill": "Habilidad",
+              "level": "Nivel",
               "virtual": "Virtual",
-              "experience": "Experience"
+              "experience": "Experiencia"
             }
           }
         },
         "quests": {
-          "name": "Quests",
-          "quest_progress": "Quest Progress",
-          "quest_statistics": "Quest Statistics",
+          "name": "Misiones",
+          "quest_progress": "Progreso de las misiones",
+          "quest_statistics": "Estadísticas de las misiones",
           "quest_types": {
-            "novice": "Novice",
-            "intermediate": "Intermediate",
-            "experienced": "Experienced",
-            "master": "Master",
-            "grandmaster": "Grandmaster",
-            "special": "Special"
+            "novice": "Aprendiz",
+            "intermediate": "Intermedia",
+            "experienced": "Experimentado",
+            "master": "Maestro",
+            "grandmaster": "Gran Maestro",
+            "special": "Especial"
           },
           "table": {
-            "title": "All Quests",
+            "title": "Todas las Misiones",
             "description": "Complete list of quests with quest points and completion status",
-            "search_placeholder": "Search quests...",
+            "search_placeholder": "Buscar Misiones...",
             "eligible_only": "Eligible Only",
             "headers": {
-              "quest_name": "Quest Name",
-              "category": "Category",
-              "quest_points": "Quest Points",
-              "status": "Status",
-              "requirements": "Requirements"
+              "quest_name": "Nombre de la Misión",
+              "category": "Categoria",
+              "quest_points": "Puntos de misión",
+              "status": "Estado",
+              "requirements": "Requisitos"
             }
           }
         }
