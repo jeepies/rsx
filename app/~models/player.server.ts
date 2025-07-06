@@ -623,3 +623,29 @@ export async function getTotalXpGainedLast24h() {
 
   return { value, percentage };
 }
+
+export async function getTrackedDaysByUsername(username: string) {
+  const player = await prisma.player.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+
+  if (!player) return 0;
+
+  const oldest = await prisma.playerSnapshot.findFirst({
+    where: { playerId: player.id },
+    orderBy: { timestamp: 'asc' },
+    select: { timestamp: true },
+  });
+
+  const latest = await prisma.playerSnapshot.findFirst({
+    where: { playerId: player.id },
+    orderBy: { timestamp: 'desc' },
+    select: { timestamp: true },
+  });
+
+  if (!oldest || !latest) return 0;
+
+  const diffMs = latest.timestamp.getTime() - oldest.timestamp.getTime();
+  return Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+}

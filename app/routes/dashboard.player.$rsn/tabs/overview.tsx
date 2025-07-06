@@ -70,7 +70,7 @@ export default function OverviewTab(props: Readonly<OverviewTabProps>) {
           <CardContent className="p-4">
             <div className="text-center">
               <Calendar className="h-5 w-5 mx-auto mb-2 text-blue-500" />
-              <div className="text-lg font-bold">0</div>
+              <div className="text-lg font-bold">{stats.daysTracked}</div>
               <div className="text-xs text-muted-foreground">Days Tracked</div>
             </div>
           </CardContent>
