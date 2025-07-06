@@ -22,7 +22,7 @@ export interface Quest {
   /**
    * Player eligible?
    */
-  Eligible: boolean
+  Eligible: boolean;
 }
 
 export enum Difficulty {
@@ -33,3 +33,12 @@ export enum Difficulty {
   Grandmaster = 4,
   Special = 250,
 }
+
+export const DifficultyLabels: Record<Difficulty, string> = {
+  [Difficulty.Novice]: 'Novice',
+  [Difficulty.Intermediate]: 'Intermediate',
+  [Difficulty.Experienced]: 'Experienced',
+  [Difficulty.Master]: 'Master',
+  [Difficulty.Grandmaster]: 'Grandmaster',
+  [Difficulty.Special]: 'Special',
+};

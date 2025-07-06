@@ -52,7 +52,12 @@ export default function Index() {
       change: `${data.totalPlayers.percentage}%`,
     },
     { title: 'Active Sessions', value: '0', icon: Activity, change: '0%' },
-    { title: 'XP Gained Today', value: data.dailyTotalXP.value.replace(/\B(?=(\d{3})+(?!\d))/g, ','), icon: TrendingUp, change: `${data.dailyTotalXP.percentage}%` },
+    {
+      title: 'XP Gained Today',
+      value: data.dailyTotalXP.value.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+      icon: TrendingUp,
+      change: `${data.dailyTotalXP.percentage}%`,
+    },
     { title: 'Drops Today', value: '0', icon: Gift, change: '0%' },
   ];
 

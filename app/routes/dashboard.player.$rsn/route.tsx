@@ -15,8 +15,8 @@ import { RuneMetrics } from '~/services/runescape.server';
 import Header from './header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';
-import { QuestsTab } from '~/components/player-profile/quests-tab';
 import SkillTab from './tabs/skills';
+import QuestsTab from './tabs/quests';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
@@ -82,6 +82,10 @@ export default function PlayerProfile() {
 
         <TabsContent value="skills" className="space-y-4 sm:space-y-6">
           <SkillTab data={data} />
+        </TabsContent>
+
+        <TabsContent value="quests" className="space-y-4 sm:space-y-6">
+          <QuestsTab data={data} />
         </TabsContent>
       </Tabs>
     </div>
