@@ -52,7 +52,7 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
             In Progress
           </Badge>
         );
-      case 'Not Started':
+      case 'NOT_STARTED':
         return <Badge variant="secondary">Not Started</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
