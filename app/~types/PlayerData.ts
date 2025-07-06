@@ -1,3 +1,4 @@
+import { Activity } from './Activity';
 import { Quest } from './Quest';
 import { Skill } from './Skill';
 
@@ -10,7 +11,10 @@ export interface PlayerData {
    * Online?
    */
   LoggedIn: boolean;
-
+  /**
+   *
+   */
+  Activities: Activity[];
   /**
    * Skills Object
    */
