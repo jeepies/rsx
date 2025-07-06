@@ -2,7 +2,7 @@ import config from '~/services/config.server';
 import { prisma } from '~/services/prisma.server';
 import redis from '~/services/redis.server';
 import { RuneMetrics } from '~/services/runescape.server';
-import { IdMap } from '~/~constants/SkillMap';
+import { IdMap, SkillCategories } from '~/~constants/Skills';
 import { CachedPlayerData, PlayerData } from '~/~types/PlayerData';
 import { getWithinTimePeriod } from './snapshot.server';
 
@@ -348,4 +348,195 @@ export async function getDailyLevelIncreases(rsn: string) {
   }
 
   return levelIncreases;
+}
+
+export async function getTotalXpGainedByDay() {
+  const now = new Date();
+  const startDate = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: { timestamp: { gte: startDate } },
+    orderBy: { timestamp: 'asc' },
+    select: {
+      playerId: true,
+      totalXp: true,
+      timestamp: true,
+    },
+  });
+
+  const groupedByDateAndPlayer = new Map<
+    string,
+    Map<string, { totalXp: bigint; timestamp: Date }>
+  >();
+
+  for (const snap of snapshots) {
+    const dateKey = snap.timestamp.toISOString().slice(0, 10);
+    if (!groupedByDateAndPlayer.has(dateKey)) {
+      groupedByDateAndPlayer.set(dateKey, new Map());
+    }
+
+    const playerMap = groupedByDateAndPlayer.get(dateKey)!;
+    const current = playerMap.get(snap.playerId);
+    if (!current || snap.timestamp > current.timestamp) {
+      playerMap.set(snap.playerId, {
+        totalXp: BigInt(snap.totalXp),
+        timestamp: snap.timestamp,
+      });
+    }
+  }
+
+  const allDates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getTime() - (7 - i) * 24 * 60 * 60 * 1000);
+    return d.toISOString().slice(0, 10);
+  });
+
+  const day0 = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+  const day0Key = day0.toISOString().slice(0, 10);
+  const day0Map = groupedByDateAndPlayer.get(day0Key) ?? new Map();
+
+  let prevXpByPlayer = new Map<string, bigint>();
+  for (const [playerId, snap] of day0Map) {
+    prevXpByPlayer.set(playerId, snap.totalXp);
+  }
+
+  const results: { date: string; dailyXP: number }[] = [];
+
+  for (const dateKey of allDates) {
+    const currentMap = groupedByDateAndPlayer.get(dateKey) ?? new Map();
+    let totalXp = 0n;
+
+    for (const [playerId, snap] of currentMap) {
+      const prev = prevXpByPlayer.get(playerId) ?? 0n;
+      const gain = snap.totalXp - prev;
+      if (gain > 0n) totalXp += gain;
+      prevXpByPlayer.set(playerId, snap.totalXp);
+    }
+
+    results.push({
+      date: dateKey,
+      dailyXP: Number(totalXp),
+    });
+  }
+
+  return results;
+}
+
+export async function getXpBySkillCategoryLast24h() {
+  const now = new Date();
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: { timestamp: { gte: since } },
+    include: { skills: true },
+    orderBy: { timestamp: 'asc' },
+  });
+
+  // group by playerId
+  const byPlayer = new Map<string, { first: Map<string, bigint>; last: Map<string, bigint> }>();
+
+  for (const snap of snapshots) {
+    const skillMap = new Map<string, bigint>(snap.skills.map((s) => [s.name, BigInt(s.xp)]));
+
+    if (!byPlayer.has(snap.playerId)) {
+      byPlayer.set(snap.playerId, { first: skillMap, last: skillMap });
+    } else {
+      byPlayer.get(snap.playerId)!.last = skillMap;
+    }
+  }
+
+  const categoryTotals: Record<keyof typeof SkillCategories, bigint> = {
+    Combat: 0n,
+    Gathering: 0n,
+    Artisan: 0n,
+    Support: 0n,
+  };
+
+  for (const { first, last } of byPlayer.values()) {
+    for (const [category, skills] of Object.entries(SkillCategories)) {
+      let xpGain = 0n;
+      for (const skill of skills) {
+        const before = first.get(skill) ?? 0n;
+        const after = last.get(skill) ?? 0n;
+        if (after > before) {
+          xpGain += after - before;
+        }
+      }
+      categoryTotals[category as keyof typeof SkillCategories] += xpGain;
+    }
+  }
+
+  const total = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0n);
+
+  const output = Object.entries(categoryTotals).map(([name, val]) => ({
+    name,
+    value: total === 0n ? 0 : Math.round(Number((val * 10000n) / total)) / 100,
+  }));
+
+  return output;
+}
+
+export async function getTopGainersLast24h(limit = 10) {
+  const now = new Date();
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: { timestamp: { gte: since } },
+    orderBy: { timestamp: 'asc' },
+    select: {
+      playerId: true,
+      totalXp: true,
+      player: { select: { username: true } },
+    },
+  });
+
+  const byPlayer = new Map<
+    string,
+    { username: string; firstXp: bigint; lastXp: bigint }
+  >();
+
+  for (const snap of snapshots) {
+    if (!snap.player?.username) continue;
+
+    const totalXpBigInt = BigInt(snap.totalXp);
+
+    if (!byPlayer.has(snap.playerId)) {
+      byPlayer.set(snap.playerId, {
+        username: snap.player.username,
+        firstXp: totalXpBigInt,
+        lastXp: totalXpBigInt,
+      });
+    } else {
+      const entry = byPlayer.get(snap.playerId)!;
+      entry.lastXp = totalXpBigInt;
+    }
+  }
+
+  function formatXp(xp: bigint): string {
+    if (xp >= 1_000_000_000n) return (Number(xp) / 1_000_000_000).toFixed(1) + 'B';
+    if (xp >= 1_000_000n) return (Number(xp) / 1_000_000).toFixed(1) + 'M';
+    if (xp >= 1_000n) return (Number(xp) / 1_000).toFixed(1) + 'K';
+    return xp.toString();
+  }
+
+  const results = Array.from(byPlayer.values())
+    .map(({ username, firstXp, lastXp }) => {
+      const gained = lastXp - firstXp;
+      return {
+        username,
+        xp: formatXp(lastXp),
+        gained: formatXp(gained),
+        gainedNum: gained,
+      };
+    })
+    .filter(({ gainedNum }) => gainedNum > 0)
+    .sort((a, b) => Number(b.gainedNum - a.gainedNum))
+    .slice(0, limit)
+    .map(({ username, xp, gained }, i) => ({
+      rank: i + 1,
+      player: username,
+      xp,
+      gained,
+    }));
+
+  return results;
 }

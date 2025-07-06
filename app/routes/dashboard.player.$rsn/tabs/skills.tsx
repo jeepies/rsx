@@ -21,8 +21,6 @@ export interface SkillsTabProps {
 export default function SkillTab(props: Readonly<SkillsTabProps>) {
   const { player, stats } = props.data;
 
-  console.log(stats.dailyLevels);
-
   const skills = player.Skills.Skills.sort((a, b) => a.JagexID - b.JagexID).map(s => ({
     ...s,
     today: {

@@ -35,3 +35,28 @@ export const SkillMap: Record<number, SkillName> = {
 export const IdMap: Record<SkillName, number> = Object.fromEntries(
   Object.entries(SkillMap).map(([id, name]) => [name, Number(id)]),
 ) as Record<SkillName, number>;
+
+export const SkillCategories = {
+  Combat: [
+    'Attack',
+    'Strength',
+    'Defence',
+    'Constitution',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Summoning',
+  ],
+  Gathering: ['Mining', 'Fishing', 'Woodcutting', 'Farming', 'Hunter', 'Divination'],
+  Artisan: [
+    'Smithing',
+    'Cooking',
+    'Firemaking',
+    'Fletching',
+    'Crafting',
+    'Construction',
+    'Herblore',
+    'Runecrafting',
+  ],
+  Support: ['Agility', 'Thieving', 'Slayer', 'Dungeoneering', 'Invention', 'Archaeology'],
+};

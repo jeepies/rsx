@@ -1,4 +1,4 @@
-import { SkillMap } from '~/~constants/SkillMap';
+import { SkillMap } from '~/~constants/Skills';
 import { PlayerData } from '~/~types/PlayerData';
 import { Difficulty, Quest } from '~/~types/Quest';
 import { Skill } from '~/~types/Skill';
