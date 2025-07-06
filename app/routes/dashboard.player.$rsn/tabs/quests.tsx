@@ -1,8 +1,18 @@
 import { CheckCircle, Minus, XCircle } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Bar, BarChart } from 'recharts';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
 import { Progress } from '~/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
+import { Switch } from '~/components/ui/switch';
 import {
   TableHeader,
   TableRow,
@@ -52,13 +62,28 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
             In Progress
           </Badge>
         );
-      case 'Not Started':
+      case 'NOT_STARTED':
         return <Badge variant="secondary">Not Started</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
   player.Quests.Quests.sort((a, b) => a.Difficulty - b.Difficulty);
+
+  const [search, setSearch] = useState('');
+  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null);
+  const [eligibleOnly, setEligibleOnly] = useState(false);
+
+  const filteredQuests = useMemo(() => {
+    return player.Quests.Quests.filter((quest) => {
+      const matchesSearch = quest.Title.toLowerCase().includes(search.toLowerCase());
+      const matchesDifficulty = difficultyFilter
+        ? DifficultyLabels[quest.Difficulty] === difficultyFilter
+        : true;
+      const matchesEligibility = eligibleOnly ? quest.Eligible === true : true;
+      return matchesSearch && matchesDifficulty && matchesEligibility;
+    });
+  }, [player.Quests.Quests, search, difficultyFilter, eligibleOnly]);
 
   const questStats = summarizeQuestsByDifficulty(player.Quests.Quests);
 
@@ -123,6 +148,33 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-start sm:items-end">
+            <Input
+              placeholder="Search quests..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-1/3"
+            />
+
+            <Select onValueChange={(val) => setDifficultyFilter(val === 'All' ? null : val)}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Filter by difficulty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Difficulties</SelectItem>
+                {Object.values(DifficultyLabels).map((label) => (
+                  <SelectItem key={label} value={label}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center space-x-2">
+              <Switch checked={eligibleOnly} onCheckedChange={setEligibleOnly} />
+              <span>Eligible Only</span>
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -134,7 +186,7 @@ export default function QuestsTab(props: Readonly<QuestTabProps>) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {player.Quests.Quests.map((quest, index) => (
+              {filteredQuests.map((quest, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
