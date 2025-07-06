@@ -8,6 +8,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardHeader } from '~/components/ui/card';
 import { Tooltip } from '~/components/ui/tooltip';
 import { PlayerData } from '~/~types/PlayerData';
+import { useTranslation } from 'react-i18next';
 
 export interface HeaderComponentProps {
   data: {
@@ -19,6 +20,7 @@ export interface HeaderComponentProps {
 export default function Header(props: Readonly<HeaderComponentProps>) {
   const { player } = props.data;
   const fetcher = useFetcher();
+  const { t } = useTranslation();
 
   return (
     <Card className="animate-fade-in">
@@ -39,7 +41,7 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  Online
+                  {t('pages.player_profile.online')}
                 </Badge>
               </div>
             </div>
@@ -56,7 +58,7 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
                     disabled={true}
                   >
                     <RefreshCw className="h-4 w-4" />
-                    <span className="hidden sm:inline">Refresh</span>
+                    <span className="hidden sm:inline">{t('pages.player_profile.refresh')}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

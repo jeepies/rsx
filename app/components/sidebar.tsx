@@ -20,19 +20,20 @@ import { Button } from '~/components/ui/button';
 import { NavLink, useNavigate } from '@remix-run/react';
 import { Card, CardContent } from './ui/card';
 import { useFavourites } from '~/contexts/favourites';
-
-const mainNavItems = [
-  { title: 'Home', url: '/dashboard/index', icon: Home },
-  { title: 'Players', url: '/dashboard/players', icon: BookUser },
-  { title: 'Leaderboards', url: '/dashboard/leaderboards', icon: BarChart3 },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardSidebar() {
+  const { t, i18n } = useTranslation();
   const { state } = useSidebar();
-  const [selectedLanguage, setSelectedLanguage] = useState('EN');
   const collapsed = state === 'collapsed';
   const navigate = useNavigate();
   const { favourites } = useFavourites();
+
+  const mainNavItems = [
+    { title: t('sidebar.home'), url: '/dashboard/index', icon: Home },
+    { title: t('sidebar.players'), url: '/dashboard/players', icon: BookUser },
+    { title: t('sidebar.leaderboards'), url: '/dashboard/leaderboards', icon: BarChart3 },
+  ];
 
   const handleFavouritesRedirect = (RSN: string) => navigate(`/dashboard/player/${RSN}`);
 
@@ -78,20 +79,20 @@ export default function DashboardSidebar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-6 px-2">
                   <Globe className="h-3 w-3 mr-1" />
-                  {selectedLanguage}
+                  {t('code')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSelectedLanguage('EN')}>
+                <DropdownMenuItem onClick={() => i18n.changeLanguage('en')}>
                   English
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage('ES')}>
+                <DropdownMenuItem onClick={() => i18n.changeLanguage('es')}>
                   Español
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage('FR')}>
+                <DropdownMenuItem onClick={() => i18n.changeLanguage('fr')}>
                   Français
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedLanguage('DE')}>
+                <DropdownMenuItem onClick={() => i18n.changeLanguage('de')}>
                   Deutsch
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -117,7 +118,7 @@ export default function DashboardSidebar() {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Favourites</span>
+                  <span className="text-sm font-medium">{t("sidebar.favourites")}</span>
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   {favourites.length === 0 ? (

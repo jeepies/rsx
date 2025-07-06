@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
 import {
@@ -19,14 +20,15 @@ export interface SkillsTabProps {
 }
 
 export default function SkillTab(props: Readonly<SkillsTabProps>) {
+  const { t } = useTranslation();
   const { player, stats } = props.data;
 
-  const skills = player.Skills.Skills.sort((a, b) => a.JagexID - b.JagexID).map(s => ({
+  const skills = player.Skills.Skills.sort((a, b) => a.JagexID - b.JagexID).map((s) => ({
     ...s,
     today: {
-        levels: stats.dailyLevels[s.HumanName],
-        xp: stats.dailyXP[s.HumanName]
-    }
+      levels: stats.dailyLevels[s.HumanName],
+      xp: stats.dailyXP[s.HumanName],
+    },
   }));
   const levelsToday = Object.values(stats.dailyLevels).reduce((a, b) => a + b, 0);
   const xpToday = Object.values(stats.dailyXP).reduce((a, b) => a + b, 0);
@@ -38,7 +40,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold">{Number(player.Skills.Level)}</div>
-              <div className="text-sm text-muted-foreground">Total Level</div>
+              <div className="text-sm text-muted-foreground">
+                {t('pages.player_profile.total_level')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -46,7 +50,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold">{formatBigInt(Number(player.Skills.XP))}</div>
-              <div className="text-sm text-muted-foreground">Total XP</div>
+              <div className="text-sm text-muted-foreground">
+                {t('pages.player_profile.tabs.skills.total_xp')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -54,7 +60,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">{levelsToday}</div>
-              <div className="text-sm text-muted-foreground">Levels Today</div>
+              <div className="text-sm text-muted-foreground">
+                {t('pages.player_profile.tabs.skills.levels_today')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -64,7 +72,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
               <div className="text-2xl font-bold text-green-400">
                 {formatBigInt(Number(xpToday))}
               </div>
-              <div className="text-sm text-muted-foreground">XP Today</div>
+              <div className="text-sm text-muted-foreground">
+                {t('pages.player_profile.tabs.skills.xp_today')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -73,20 +83,23 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            Skill Details
+            {t('pages.player_profile.tabs.skills.table.title')}
           </CardTitle>
-          <CardDescription>Detailed breakdown of all skill levels and experience</CardDescription>
+          <CardDescription>
+            {' '}
+            {t('pages.player_profile.tabs.skills.table.description')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Skill</TableHead>
-                <TableHead className="text-right">Level</TableHead>
-                <TableHead className="text-right">Virtual</TableHead>
-                <TableHead className="text-right">Experience</TableHead>
-                <TableHead className="text-right">Levels Today</TableHead>
-                <TableHead className="text-right">XP Today</TableHead>
+                <TableHead>{t('pages.player_profile.tabs.skills.table.headers.skill')}</TableHead>
+                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.level')}</TableHead>
+                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.virtual')}</TableHead>
+                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.experience')}</TableHead>
+                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.levels_today')}</TableHead>
+                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.xp_today')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -109,7 +122,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
                   </TableCell>
                   <TableCell className="text-right">
                     {skill.today.xp > 0 ? (
-                      <span className="text-green-400 font-medium">+{formatBigInt(Number(skill.today.xp))}</span>
+                      <span className="text-green-400 font-medium">
+                        +{formatBigInt(Number(skill.today.xp))}
+                      </span>
                     ) : (
                       <span className="text-muted-foreground">0</span>
                     )}
