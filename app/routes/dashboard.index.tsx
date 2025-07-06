@@ -21,6 +21,7 @@ import {
   getTotalXpGainedLast24h,
   getXpBySkillCategoryLast24h,
 } from '~/~models/player.server';
+import { useTranslation } from 'react-i18next';
 
 export async function loader() {
   const [weeklyDailyXPGain, dailyCategories, topEarners, totalPlayers, dailyTotalXP] =
@@ -43,22 +44,28 @@ export async function loader() {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const { t, i18n } = useTranslation();
 
   const stats = [
     {
-      title: 'Total Players Tracked',
+      title: t('pages.home.total_players_tracked'),
       value: data.totalPlayers.value,
       icon: Users,
       change: `${data.totalPlayers.percentage}%`,
     },
-    { title: 'Active Sessions', value: '0', icon: Activity, change: '0%' },
     {
-      title: 'XP Gained Today',
+      title: t('pages.home.active_session'),
+      value: '0',
+      icon: Activity,
+      change: '0%',
+    },
+    {
+      title: t('pages.home.xp_today'),
       value: data.dailyTotalXP.value.replace(/\B(?=(\d{3})+(?!\d))/g, ','),
       icon: TrendingUp,
       change: `${data.dailyTotalXP.percentage}%`,
     },
-    { title: 'Drops Today', value: '0', icon: Gift, change: '0%' },
+    { title: t('pages.home.drops_today'), value: '0', icon: Gift, change: '0%' },
   ];
 
   const COLORS = ['#a29bfe', '#fd79a8', '#00b894', '#fdcb6e'];
@@ -67,11 +74,9 @@ export default function Index() {
     <div className="space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Welcome to Nexus
+          {t('pages.home.welcome')}
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Your comprehensive RuneScape 3 tracking and toolkit service
-        </p>
+        <p className="text-muted-foreground text-lg">{t('pages.home.motto')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -90,7 +95,7 @@ export default function Index() {
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
               <Badge variant="secondary" className="mt-1 text-xs">
-                {stat.change} from yesterday
+                {stat.change}
               </Badge>
             </CardContent>
           </Card>
@@ -102,9 +107,9 @@ export default function Index() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Weekly XP Trends
+              {t('pages.home.weekly_xp_trends.title')}
             </CardTitle>
-            <CardDescription>Total XP gained across all tracked players</CardDescription>
+            <CardDescription> {t('pages.home.weekly_xp_trends.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -138,9 +143,9 @@ export default function Index() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-primary" />
-              Skill Category Distribution
+              {t('pages.home.skill_pie_chart.title')}
             </CardTitle>
-            <CardDescription>Most popular skill categories being trained</CardDescription>
+            <CardDescription> {t('pages.home.skill_pie_chart.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -177,9 +182,9 @@ export default function Index() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-primary" />
-            Top XP Gainers Today
+            {t('pages.home.top_earners.title')}
           </CardTitle>
-          <CardDescription>Players with the highest XP gains in the last 24 hours</CardDescription>
+          <CardDescription> {t('pages.home.top_earners.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -204,12 +209,14 @@ export default function Index() {
                   </div>
                   <div>
                     <div className="font-medium">{player.player}</div>
-                    <div className="text-sm text-muted-foreground">Total: {player.xp}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {t('misc.total')}: {player.xp}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-primary">+{player.gained}</div>
-                  <div className="text-xs text-muted-foreground">XP gained</div>
+                  <div className="text-xs text-muted-foreground">{t('misc.xp_gained')}</div>
                 </div>
               </div>
             ))}

@@ -1,10 +1,36 @@
 {
   "human_name": "English",
   "code": "EN",
+  "misc": {
+    "total": "Total",
+    "xp_gained": "XP gained"
+  },
   "sidebar": {
     "home": "Home",
     "players": "Players",
     "leaderboards": "Leaderboards",
     "favourites": "Favourites"
+  },
+  "pages": {
+    "home": {
+      "welcome": "Welcome to Nexus",
+      "motto": "Your comprehensive Runescape 3 tracking and toolkit service",
+      "total_players_tracked": "Total Players Tracked",
+      "active_session": "Active Sessions",
+      "xp_today": "XP Gained Today",
+      "drops_today": "Drops Today",
+      "weekly_xp_trends": {
+        "title": "Weekly XP Trends",
+        "description": "Total XP gained across all tracked players"
+      },
+      "skill_pie_chart": {
+        "title": "Skill Category Distribution",
+        "description": "Most popular skill categories being trained"
+      },
+      "top_earners": {
+        "title": "Top XP Gainers Today",
+        "description": "Players with the highest XP gains in the last 24 hours"
+      }
+    }
   }
 }
