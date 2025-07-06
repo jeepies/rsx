@@ -50,7 +50,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     getTrackedDaysByUsername(rsn),
   ]);
 
-  const clanName = await Runescape.getPlayerClanName(rsn);
+  const clanName = (await Runescape.getPlayerClanName(rsn)) ?? "N/A";
 
   return {
     player,
