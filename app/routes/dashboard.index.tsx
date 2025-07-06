@@ -16,21 +16,28 @@ import {
 import { useLoaderData } from '@remix-run/react';
 import {
   getTopGainersLast24h,
+  getTotalTrackedPlayers,
   getTotalXpGainedByDay,
+  getTotalXpGainedLast24h,
   getXpBySkillCategoryLast24h,
 } from '~/~models/player.server';
 
 export async function loader() {
-  const [weeklyDailyXPGain, dailyCategories, topEarners] = await Promise.all([
-    getTotalXpGainedByDay(),
-    getXpBySkillCategoryLast24h(),
-    getTopGainersLast24h(),
-  ]);
+  const [weeklyDailyXPGain, dailyCategories, topEarners, totalPlayers, dailyTotalXP] =
+    await Promise.all([
+      getTotalXpGainedByDay(),
+      getXpBySkillCategoryLast24h(),
+      getTopGainersLast24h(),
+      getTotalTrackedPlayers(),
+      getTotalXpGainedLast24h(),
+    ]);
 
   return {
     weeklyDailyXPGain,
     dailyCategories,
     topEarners,
+    totalPlayers,
+    dailyTotalXP,
   };
 }
 
@@ -40,12 +47,12 @@ export default function Index() {
   const stats = [
     {
       title: 'Total Players Tracked',
-      value: '0',
+      value: data.totalPlayers.value,
       icon: Users,
-      change: `0%`,
+      change: `${data.totalPlayers.percentage}%`,
     },
     { title: 'Active Sessions', value: '0', icon: Activity, change: '0%' },
-    { title: 'XP Gained Today', value: '0', icon: TrendingUp, change: '0%' },
+    { title: 'XP Gained Today', value: data.dailyTotalXP.value.replace(/\B(?=(\d{3})+(?!\d))/g, ','), icon: TrendingUp, change: `${data.dailyTotalXP.percentage}%` },
     { title: 'Drops Today', value: '0', icon: Gift, change: '0%' },
   ];
 

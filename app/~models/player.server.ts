@@ -489,10 +489,7 @@ export async function getTopGainersLast24h(limit = 10) {
     },
   });
 
-  const byPlayer = new Map<
-    string,
-    { username: string; firstXp: bigint; lastXp: bigint }
-  >();
+  const byPlayer = new Map<string, { username: string; firstXp: bigint; lastXp: bigint }>();
 
   for (const snap of snapshots) {
     if (!snap.player?.username) continue;
@@ -539,4 +536,90 @@ export async function getTopGainersLast24h(limit = 10) {
     }));
 
   return results;
+}
+
+export async function getTotalTrackedPlayers() {
+  const now = new Date();
+  const todayStart = new Date(now.setHours(0, 0, 0, 0));
+  const yesterdayStart = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
+  const dayBeforeYesterdayStart = new Date(yesterdayStart.getTime() - 24 * 60 * 60 * 1000);
+
+  const [todayCount, yesterdayCount] = await Promise.all([
+    prisma.player.count({
+      where: {
+        createdAt: {
+          gte: todayStart,
+        },
+      },
+    }),
+    prisma.player.count({
+      where: {
+        createdAt: {
+          gte: yesterdayStart,
+          lt: todayStart,
+        },
+      },
+    }),
+  ]);
+
+  const value = todayCount.toString();
+  const percentage =
+    yesterdayCount === 0 ? 100 : ((todayCount - yesterdayCount) / yesterdayCount) * 100;
+
+  return { value, percentage };
+}
+
+export async function getTotalXpGainedLast24h() {
+  const now = new Date();
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const beforeSince = new Date(since.getTime() - 24 * 60 * 60 * 1000);
+
+  async function getXpGainedBetween(start: Date, end: Date) {
+    const snapshots = await prisma.playerSnapshot.findMany({
+      where: {
+        timestamp: {
+          gte: start,
+          lt: end,
+        },
+      },
+      orderBy: { timestamp: 'asc' },
+      select: {
+        playerId: true,
+        totalXp: true,
+      },
+    });
+
+    const byPlayer = new Map<string, { first: bigint; last: bigint }>();
+
+    for (const snap of snapshots) {
+      const xp = BigInt(snap.totalXp);
+
+      if (!byPlayer.has(snap.playerId)) {
+        byPlayer.set(snap.playerId, { first: xp, last: xp });
+      } else {
+        byPlayer.get(snap.playerId)!.last = xp;
+      }
+    }
+
+    let totalGain = 0n;
+
+    for (const { first, last } of byPlayer.values()) {
+      if (last > first) totalGain += last - first;
+    }
+
+    return totalGain;
+  }
+
+  const [currentGain, previousGain] = await Promise.all([
+    getXpGainedBetween(since, now),
+    getXpGainedBetween(beforeSince, since),
+  ]);
+
+  const value = currentGain.toString();
+  const percentage =
+    previousGain === 0n
+      ? 100
+      : Number(((currentGain - previousGain) * 10000n) / previousGain) / 100;
+
+  return { value, percentage };
 }
