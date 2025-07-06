@@ -44,7 +44,7 @@ export async function loader() {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const stats = [
     {
