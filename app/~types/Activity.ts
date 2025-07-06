@@ -20,7 +20,7 @@ export interface Activity {
   /**
    * Locally given type
    */
-  Type: ActivityType;
+  Type?: ActivityType;
 }
 
 export enum ActivityType {
