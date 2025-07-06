@@ -236,3 +236,63 @@ export async function getFreshestData(username: string) {
     },
   };
 }
+
+export async function getWeeklyXpByDay(username: string) {
+  const now = new Date();
+  const startDate = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: {
+      player: { username },
+      timestamp: { gte: startDate },
+    },
+    orderBy: { timestamp: 'asc' },
+    select: { totalXp: true, timestamp: true },
+  });
+
+  if (snapshots.length === 0) {
+    return Array.from({ length: 7 }, (_, i) => ({
+      date: `Day ${i + 1}`,
+      dailyXP: 0,
+    }));
+  }
+
+  const snapshotsByDate = new Map<string, { totalXp: bigint; timestamp: Date }>();
+
+  for (const snap of snapshots) {
+    const dateKey = snap.timestamp.toISOString().slice(0, 10);
+    const existing = snapshotsByDate.get(dateKey);
+    if (!existing || snap.timestamp > existing.timestamp) {
+      snapshotsByDate.set(dateKey, {
+        totalXp: BigInt(snap.totalXp),
+        timestamp: snap.timestamp,
+      });
+    }
+  }
+
+  const dateStrings: string[] = [];
+  for (let i = 7; i >= 1; i--) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    dateStrings.push(d.toISOString().slice(0, 10));
+  }
+
+  const day0Date = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+  const day0Key = day0Date.toISOString().slice(0, 10);
+  const day0Xp = snapshotsByDate.get(day0Key)?.totalXp ?? 0n;
+
+  const xpData = [];
+
+  let prevXp = day0Xp;
+
+  for (let i = 0; i < dateStrings.length; i++) {
+    const xpForDay = snapshotsByDate.get(dateStrings[i])?.totalXp ?? prevXp;
+    const dailyXp = xpForDay - prevXp;
+    xpData.push({
+      date: `Day ${i + 1}`,
+      dailyXP: Number(dailyXp > 0n ? dailyXp : 0n),
+    });
+    prevXp = xpForDay;
+  }
+
+  return xpData;
+}
