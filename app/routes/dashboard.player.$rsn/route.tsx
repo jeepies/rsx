@@ -1,5 +1,12 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
-import { isRouteErrorResponse, useLoaderData, useParams, useRouteError } from '@remix-run/react';
+import {
+  isRouteErrorResponse,
+  useLoaderData,
+  useLocation,
+  useNavigation,
+  useParams,
+  useRouteError,
+} from '@remix-run/react';
 import PlayerNotFound from './not-found';
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
@@ -18,6 +25,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';
 import SkillTab from './tabs/skills';
 import QuestsTab from './tabs/quests';
+import { useState, useRef, useEffect } from 'react';
+import { PlayerProfileSkeleton } from './skeleton';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
@@ -47,7 +56,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       weeklyXp,
       dailyXP,
       dailyLevels,
-      daysTracked
+      daysTracked,
     },
     meta,
     chatheadURI: RuneMetrics.getChatheadURI(rsn),
@@ -57,6 +66,31 @@ export async function loader({ params }: LoaderFunctionArgs) {
 export default function PlayerProfile() {
   const data = useLoaderData<typeof loader>();
   const params = useParams();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === 'loading';
+  const isNavigatingToSamePlayerRoute =
+    navigation.location?.pathname.startsWith('/player/') &&
+    params.rsn &&
+    navigation.location.pathname.toLowerCase().includes(params.rsn.toLowerCase());
+  const shouldShowSkeletonLoading = isLoading && isNavigatingToSamePlayerRoute;
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setMinTimeElapsed(false);
+    timerRef.current = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 400);
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [shouldShowSkeletonLoading]);
+  const showSkeleton = shouldShowSkeletonLoading || !minTimeElapsed || !data;
+
+  if (showSkeleton) {
+    return <PlayerProfileSkeleton />;
+  }
 
   if (!data) {
     return <PlayerNotFound RSN={params.rsn || ''} />;
