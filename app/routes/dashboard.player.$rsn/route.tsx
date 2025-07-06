@@ -19,7 +19,7 @@ import {
 import { prisma } from '~/services/prisma.server';
 import { sanitizeBigInts } from '~/lib/utils';
 import { PlayerData } from '~/~types/PlayerData';
-import { RuneMetrics } from '~/services/runescape.server';
+import { RuneMetrics, Runescape } from '~/services/runescape.server';
 import Header from './header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';
@@ -50,6 +50,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
     getTrackedDaysByUsername(rsn),
   ]);
 
+  const clanName = await Runescape.getPlayerClanName(rsn);
+
   return {
     player,
     stats: {
@@ -57,6 +59,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
       dailyXP,
       dailyLevels,
       daysTracked,
+    },
+    clan: {
+      clanName
     },
     meta,
     chatheadURI: RuneMetrics.getChatheadURI(rsn),
