@@ -2,7 +2,12 @@ import { LoaderFunctionArgs } from '@remix-run/node';
 import { isRouteErrorResponse, useLoaderData, useParams, useRouteError } from '@remix-run/react';
 import PlayerNotFound from './not-found';
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
-import { getFreshestData, getWeeklyXpByDay } from '~/~models/player.server';
+import {
+  getDailyLevelIncreases,
+  getDailyXpIncreases,
+  getFreshestData,
+  getWeeklyXpByDay,
+} from '~/~models/player.server';
 import { prisma } from '~/services/prisma.server';
 import { sanitizeBigInts } from '~/lib/utils';
 import { PlayerData } from '~/~types/PlayerData';
@@ -11,6 +16,7 @@ import Header from './header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';
 import { QuestsTab } from '~/components/player-profile/quests-tab';
+import SkillTab from './tabs/skills';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
@@ -27,12 +33,18 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const player: PlayerData = sanitizeBigInts(data);
 
-  const [weeklyXp] = await Promise.all([getWeeklyXpByDay(rsn)]);
+  const [weeklyXp, dailyXP, dailyLevels] = await Promise.all([
+    getWeeklyXpByDay(rsn),
+    getDailyXpIncreases(rsn),
+    getDailyLevelIncreases(rsn),
+  ]);
 
   return {
     player,
     stats: {
       weeklyXp,
+      dailyXP,
+      dailyLevels,
     },
     meta,
     chatheadURI: RuneMetrics.getChatheadURI(rsn),
@@ -66,6 +78,10 @@ export default function PlayerProfile() {
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
           <OverviewTab data={data} />
+        </TabsContent>
+
+        <TabsContent value="skills" className="space-y-4 sm:space-y-6">
+          <SkillTab data={data} />
         </TabsContent>
       </Tabs>
     </div>

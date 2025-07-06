@@ -4,6 +4,7 @@ import redis from '~/services/redis.server';
 import { RuneMetrics } from '~/services/runescape.server';
 import { IdMap } from '~/~constants/SkillMap';
 import { CachedPlayerData, PlayerData } from '~/~types/PlayerData';
+import { getWithinTimePeriod } from './snapshot.server';
 
 function getRedisKey(username: string): string {
   return `rsn:lock:${username}`;
@@ -295,4 +296,56 @@ export async function getWeeklyXpByDay(username: string) {
   }
 
   return xpData;
+}
+
+export async function getDailyXpIncreases(rsn: string) {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - config.TIMINGS.HOURS_PER_DAY);
+
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: oneDayAgo,
+    to: now,
+    order: 'asc',
+  });
+
+  if (snapshots.length < 2) return {};
+
+  const firstSkills = Object.fromEntries(snapshots[0].skills.map((s) => [s.name, s.xp]));
+  const lastSkills = Object.fromEntries(
+    snapshots[snapshots.length - 1].skills.map((s) => [s.name, s.xp]),
+  );
+
+  const xpIncreases: Record<string, number> = {};
+  for (const skillName in lastSkills) {
+    xpIncreases[skillName] = Number(lastSkills[skillName] - (firstSkills[skillName] ?? 0n));
+  }
+
+  return xpIncreases;
+}
+
+export async function getDailyLevelIncreases(rsn: string) {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - config.TIMINGS.HOURS_PER_DAY);
+
+  const snapshots = await getWithinTimePeriod({
+    rsn,
+    from: oneDayAgo,
+    to: now,
+    order: 'asc',
+  });
+
+  if (snapshots.length < 2) return {};
+
+  const firstSkills = Object.fromEntries(snapshots[0].skills.map((s) => [s.name, s.level]));
+  const lastSkills = Object.fromEntries(
+    snapshots[snapshots.length - 1].skills.map((s) => [s.name, s.level]),
+  );
+
+  const levelIncreases: Record<string, number> = {};
+  for (const skillName in lastSkills) {
+    levelIncreases[skillName] = Number(lastSkills[skillName] - (firstSkills[skillName] ?? 0n));
+  }
+
+  return levelIncreases;
 }

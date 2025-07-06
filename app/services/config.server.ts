@@ -11,6 +11,7 @@ interface Config {
     AUTO_REFRESH: number;
     MANUAL_REFRESH: number;
     MIN_SKELETON_TIME: number;
+    HOURS_PER_DAY: number;
   };
 }
 
@@ -22,6 +23,7 @@ const config: Config = {
     AUTO_REFRESH: Number(process.env.AUTO_REFRESH) || 900000,
     MANUAL_REFRESH: Number(process.env.MANUAL_REFRESH) || 300000,
     MIN_SKELETON_TIME: Number(process.env.MIN_SKELETON_TIME) || 400,
+    HOURS_PER_DAY: 24 * 60 * 60 * 1000,
   },
 };
 
