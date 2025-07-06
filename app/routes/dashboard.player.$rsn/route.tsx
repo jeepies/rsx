@@ -6,6 +6,7 @@ import {
   getDailyLevelIncreases,
   getDailyXpIncreases,
   getFreshestData,
+  getTrackedDaysByUsername,
   getWeeklyXpByDay,
 } from '~/~models/player.server';
 import { prisma } from '~/services/prisma.server';
@@ -33,10 +34,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const player: PlayerData = sanitizeBigInts(data);
 
-  const [weeklyXp, dailyXP, dailyLevels] = await Promise.all([
+  const [weeklyXp, dailyXP, dailyLevels, daysTracked] = await Promise.all([
     getWeeklyXpByDay(rsn),
     getDailyXpIncreases(rsn),
     getDailyLevelIncreases(rsn),
+    getTrackedDaysByUsername(rsn),
   ]);
 
   return {
@@ -45,6 +47,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       weeklyXp,
       dailyXP,
       dailyLevels,
+      daysTracked
     },
     meta,
     chatheadURI: RuneMetrics.getChatheadURI(rsn),
