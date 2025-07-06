@@ -1,5 +1,5 @@
-import { Button } from '../ui/button';
 import { Heart } from 'lucide-react';
+import { Button } from '~/components/ui/button';
 import { useFavourites } from '~/contexts/favourites';
 
 interface FavouriteButtonProps {

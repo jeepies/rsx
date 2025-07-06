@@ -1,4 +1,4 @@
-import { prisma } from '../prisma.server';
+import { prisma } from '~/services/prisma.server';
 
 export interface GetSnapshotsOptions {
   rsn: string;
@@ -15,13 +15,15 @@ export async function getWithinTimePeriod({
   order = 'asc',
   take,
 }: GetSnapshotsOptions) {
-  const player = await prisma.player.findUnique({ where: { username: rsn } });
+  const player = await prisma.player.findUnique({
+    where: { username: rsn },
+  });
 
-  if (!player) throw new Error('cannot access snapshots of unknown player');
+  if (!player) throw new Error('Cannot access snapshots of unknown player');
 
   return prisma.playerSnapshot.findMany({
     where: {
-      playerId: player?.id,
+      playerId: player.id,
       timestamp: {
         gte: from,
         lte: to,
@@ -32,7 +34,6 @@ export async function getWithinTimePeriod({
     },
     include: {
       skills: true,
-      activities: true,
     },
     ...(take ? { take } : {}),
   });

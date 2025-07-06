@@ -12,6 +12,9 @@
     "typecheck": "tsc --noEmit",
     "prepare": "husky install"
   },
+  "prisma": {
+    "seed": "node --loader ts-node/esm prisma/seed.ts"
+  },
   "lint-staged": {
     "*.{ts,tsx,js}": [
       "eslint --fix",
@@ -50,6 +53,7 @@
   },
   "devDependencies": {
     "@remix-run/dev": "^2.16.8",
+    "@types/node": "^24.0.10",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -67,6 +71,7 @@
     "prettier": "^3.6.2",
     "prisma": "6.11.1",
     "tailwindcss": "^3.4.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^6.0.0",
     "vite-tsconfig-paths": "^4.2.1"
