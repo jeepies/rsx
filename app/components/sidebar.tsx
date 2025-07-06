@@ -118,7 +118,7 @@ export default function DashboardSidebar() {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Favourites</span>
+                  <span className="text-sm font-medium">{t("sidebar.favourites")}</span>
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   {favourites.length === 0 ? (
