@@ -220,6 +220,7 @@
             "password_placeholder": "Password...",
             "password_notice": "Leave blank for no password",
             "generate": "Generate a password",
+            "joinable": "Joinable after creation",
             "advance": "Next"
           },
           "2": {

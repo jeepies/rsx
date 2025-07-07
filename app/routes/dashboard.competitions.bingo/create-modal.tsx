@@ -1,4 +1,4 @@
-import { Eye, EyeClosedIcon, Grid3X3, Lock, Pencil, User, Users, X } from 'lucide-react';
+import { Eye, EyeClosedIcon, Grid3X3, Lock, Pencil, X } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/button';
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { Switch } from '~/components/ui/switch';
 import { Tag, TagsInput } from '~/components/ui/tags-input';
 import { Drops, NormalizedDropsToDrops } from '~/~constants/Drops';
 
@@ -39,6 +40,7 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
 
   const [password, setPassword] = useState('');
   const [canSeePassword, setCanSeePassword] = useState(false);
+  const [joinable, setJoinable] = useState(false);
 
   const [editingId, setEditingId] = useState<number>(-1);
   const [items, setItems] = useState<{ [index: number]: string }>({});
@@ -221,12 +223,12 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                 </span>
               </div>
             </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="joinable">{t(`${key}.step.${step}.joinable`)}</Label>
+              <Switch checked={joinable} onCheckedChange={setJoinable} />
+            </div>
           </div>
-          <Button
-            className="w-full"
-            disabled={!name || !description}
-            onClick={() => validateAndProceed()}
-          >
+          <Button className="w-full" onClick={() => validateAndProceed()}>
             {t(`${key}.step.${step}.advance`)}
           </Button>
         </CardContent>
@@ -267,10 +269,12 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                     setStep(-1);
                   }}
                 >
-                    {NormalizedDropsToDrops[items[i]]}
+                  {NormalizedDropsToDrops[items[i]]}
                 </div>
               ))}
             </div>
+
+            {/* // TODO add ability to randomize grids after they've been placed */}
           </div>
 
           <Button className="w-full" disabled={!name || !description} onClick={() => setStep(3)}>
