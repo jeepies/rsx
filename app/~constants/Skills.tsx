@@ -46,6 +46,7 @@ export const SkillCategories = {
     'Prayer',
     'Magic',
     'Summoning',
+    "Necromancy"
   ],
   Gathering: ['Mining', 'Fishing', 'Woodcutting', 'Farming', 'Hunter', 'Divination'],
   Artisan: [
