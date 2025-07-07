@@ -6,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { formatDistance } from 'date-fns';
 import { Badge } from '~/components/ui/badge';
+import CreateBingoModal from './create-modal';
 
 export default function XPCompetitions() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('active');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const chatGPTBingo = [
     {
@@ -97,7 +99,7 @@ export default function XPCompetitions() {
           </h1>
           <p className="text-muted-foreground mt-2">{t('pages.bingo_competition.description')}</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => setCreateModalOpen(true)}>
           <Plus className="h-4 w-4" />
           {t('pages.bingo_competition.create_competition')}
         </Button>
@@ -278,6 +280,7 @@ export default function XPCompetitions() {
           )}
         </TabsContent>
       </Tabs>
+      {createModalOpen && <CreateBingoModal setter={setCreateModalOpen} />}
     </div>
   );
 }

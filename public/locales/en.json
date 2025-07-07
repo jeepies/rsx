@@ -193,7 +193,34 @@
         }
       },
       "participants": "participants",
-      "progress": "Progress"
+      "progress": "Progress",
+      "create_modal": {
+        "title": "Bingo Competition",
+        "description": "Create a new bingo competition",
+        "errors": {
+          "name_length": "Name must be between 1 and 18 characters",
+          "description_length": "Description must be between 1 and 28 characters",
+          "users_length": "There must be at least one user"
+        },
+        "step": {
+          "0": {
+            "name": "Name",
+            "name_placeholder": "Competition name...",
+            "description": "Description",
+            "description_placeholder": "A short description...",
+            "users": "Users",
+            "users_placeholder": "Usernames separated by commas",
+            "advance": "Let's go!"
+          },
+          "1": {
+            "password": "Password",
+            "password_placeholder": "Password...",
+            "password_notice": "Leave blank for no password",
+            "generate": "Generate a password",
+            "advance": "Next"
+          }
+        }
+      }
     }
   }
 }
