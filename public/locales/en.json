@@ -152,6 +152,26 @@
           "leaderboard": "leaderboard"
         }
       }
+    },
+    "xp_competition": {
+      "title": "XP Competitions",
+      "description": "Compete with other players for the highest XP",
+      "create_competition": "Create Competition",
+      "check_back": "Check back later for new competitions",
+      "tabs": {
+        "active": {
+          "name": "Active",
+          "error": "No Active Competitions"
+        },
+        "upcoming": {
+          "name": "Upcoming",
+          "error": "No Upcoming Competitions"
+        },
+        "completed": {
+          "name": "Completed",
+          "error": "No Completed Competitions"
+        }
+      }
     }
   }
 }
