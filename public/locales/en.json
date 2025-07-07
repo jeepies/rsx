@@ -8,8 +8,15 @@
   "sidebar": {
     "home": "Home",
     "players": "Players",
+    "clans": "Clans",
     "leaderboards": "Leaderboards",
-    "favourites": "Favourites"
+    "favourites": "Favourites",
+    "competitions": "Competitions",
+    "xp_competition": "XP Competition",
+    "bingo": "Bingo",
+    "session": "Session",
+    "tasks": "Tasks",
+    "bosses": "Bosses"
   },
   "pages": {
     "home": {
