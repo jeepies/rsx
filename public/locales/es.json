@@ -152,6 +152,28 @@
           "leaderboard": "Clasificación"
         }
       }
+    },
+    "bingo_competition": {
+      "title": "Bingo Competitions",
+      "description": "Get drops and mark off bingo cards",
+      "create_competition": "Create Bingo",
+      "check_back": "Check back later for new competitions",
+      "tabs": {
+        "active": {
+          "name": "Active",
+          "error": "No Active Bingo Competitions"
+        },
+        "upcoming": {
+          "name": "Upcoming",
+          "error": "No Upcoming Bingo Competitions"
+        },
+        "completed": {
+          "name": "Completed",
+          "error": "No Completed Bingo Competitions"
+        }
+      },
+      "participants": "participants",
+      "progress": "Progress"
     }
   }
 }
