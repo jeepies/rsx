@@ -4,54 +4,85 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import TopSkills from './top-skills';
 import TopPlayers from './top-players';
-import { useState } from 'react';
+import { act, useState } from 'react';
+import {
+  getActivePlayersToday,
+  getMaxedPlayers,
+  getSkillLeaderboard,
+  getTopPopularSkills,
+  getTotalTrackedPlayers,
+  getWeeklyTotalXP,
+} from '~/~models/player.server';
+import { useLoaderData } from '@remix-run/react';
+import { formatBigInt } from '~/lib/utils';
+import { SkillMap } from '~/~constants/Skills';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  return null;
+  const url = new URL(request.url);
+  let timeFilter = url.searchParams.get('time')?.toLowerCase() ?? 'all_time';
+  let skillFilter = url.searchParams.get('skill')?.toLowerCase() ?? 'overall';
+
+  const skills = Object.entries(SkillMap).map(([_, name]) => name.toLowerCase());
+
+  if (!['all_time', 'month', 'week', 'today'].includes(timeFilter)) timeFilter = 'all_time';
+  if (!['overall', ...skills].includes(skillFilter)) skillFilter = 'overall';
+
+  const [maxedPlayers, totalXP, totalPlayers, activePlayers, popularSkills, leaderboard] =
+    await Promise.all([
+      getMaxedPlayers(),
+      getWeeklyTotalXP(),
+      getTotalTrackedPlayers(),
+      getActivePlayersToday(),
+      getTopPopularSkills(),
+      getSkillLeaderboard(skillFilter, timeFilter),
+    ]);
+
+  return {
+    maxedPlayers,
+    totalXP,
+    totalPlayers,
+    activePlayers,
+    popularSkills,
+    leaderboards: {
+      leaderboard: leaderboard,
+      time: timeFilter,
+      skill: skillFilter,
+    },
+  };
 }
 
 export default function Leaderboards() {
+  const data = useLoaderData<typeof loader>();
   const { t } = useTranslation();
 
-  const [timeFilter, setTimeFilter] = useState('all_time');
-  const [skillFilter, setSkillFilter] = useState('overall');
+  const [timeFilter, setTimeFilter] = useState(data.leaderboards.time);
+  const [skillFilter, setSkillFilter] = useState(data.leaderboards.skill);
 
   const stats = [
     {
       title: t('pages.leaderboards.cards.total_players.title'),
       description: t('pages.leaderboards.cards.total_players.description'),
-      value: '0',
+      value: data.totalPlayers.value,
       icon: Users,
     },
     {
       title: t('pages.leaderboards.cards.maxed_players.title'),
       description: t('pages.leaderboards.cards.maxed_players.description'),
-      value: '0',
+      value: data.maxedPlayers,
       icon: Crown,
     },
     {
       title: t('pages.leaderboards.cards.weekly_xp.title'),
       description: t('pages.leaderboards.cards.weekly_xp.description'),
-      value: '0',
+      value: formatBigInt(data.totalXP),
       icon: TrendingUp,
     },
     {
       title: t('pages.leaderboards.cards.active_today.title'),
       description: t('pages.leaderboards.cards.active_today.description'),
-      value: '0',
+      value: data.activePlayers,
       icon: Calendar,
     },
-  ];
-
-  const sampleData = [
-    { skill: 'Necromancy', players: 16 },
-    { skill: 'Attack', players: 5 },
-    { skill: 'Defence', players: 3 },
-    { skill: 'Runecrafting', players: 2 },
-    { skill: 'Constitution', players: 1 },
-    { skill: 'Crafting', players: 1 },
-    { skill: 'Strength', players: 1 },
-    { skill: 'Divination', players: 0 },
   ];
 
   return (
@@ -82,9 +113,12 @@ export default function Leaderboards() {
         ))}
       </div>
 
-      <TopSkills data={sampleData} />
+      <TopSkills data={data.popularSkills} />
 
-      <TopPlayers filters={{ time: timeFilter, skill: skillFilter }} data={{}} />
+      <TopPlayers
+        filters={{ time: [timeFilter, setTimeFilter], skill: [skillFilter, setSkillFilter] }}
+        data={data.leaderboards}
+      />
     </div>
   );
 }
