@@ -5,6 +5,10 @@
     "total": "Total",
     "xp_gained": "XP Ganada"
   },
+  "auth": {
+    "login_required": "Inicio de sesión requerido",
+    "login_required_description": "Necesitas iniciar sesión para poder acceder a esta herramienta."
+  },
   "sidebar": {
     "home": "Página Principal",
     "players": "Jugadores",
