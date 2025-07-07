@@ -30,7 +30,7 @@ export default function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={toggleTheme}
-      className="transition-smooth hover:bg-muted"
+      className="transition-smooth"
     >
       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>

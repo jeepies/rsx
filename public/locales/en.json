@@ -5,11 +5,26 @@
     "total": "Total",
     "xp_gained": "XP gained"
   },
+  "auth": {
+    "login_required": "Login Required",
+    "login_required_description": "You need to be logged in to access this feature."
+  },
+  "topbar": {
+    "search_placeholder": "Search for a player...",
+    "recent_searches": "Recent Searches"
+  },
   "sidebar": {
     "home": "Home",
     "players": "Players",
+    "clans": "Clans",
     "leaderboards": "Leaderboards",
-    "favourites": "Favourites"
+    "favourites": "Favourites",
+    "competitions": "Competitions",
+    "xp_competition": "XP Competition",
+    "bingo": "Bingo",
+    "session": "Session",
+    "tasks": "Tasks",
+    "bosses": "Bosses"
   },
   "pages": {
     "home": {

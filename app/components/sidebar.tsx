@@ -1,5 +1,18 @@
-import { BarChart3, BookUser, Globe, Heart, Home, ListTodo } from 'lucide-react';
-import { useState } from 'react';
+import {
+  BarChart3,
+  BookUser,
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Grid3X3,
+  Heart,
+  Home,
+  ListTodo,
+  Target,
+  Trophy,
+  Users,
+  Zap,
+} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +34,7 @@ import { NavLink, useNavigate } from '@remix-run/react';
 import { Card, CardContent } from './ui/card';
 import { useFavourites } from '~/contexts/favourites';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 export default function DashboardSidebar() {
   const { t, i18n } = useTranslation();
@@ -28,11 +42,44 @@ export default function DashboardSidebar() {
   const collapsed = state === 'collapsed';
   const navigate = useNavigate();
   const { favourites } = useFavourites();
+  const [competitionsOpen, setCompetitionsOpen] = useState(false);
 
   const mainNavItems = [
     { title: t('sidebar.home'), url: '/dashboard/index', icon: Home },
     { title: t('sidebar.players'), url: '/dashboard/players', icon: BookUser },
+    { title: t('sidebar.clans'), url: '/dashboard/clans', icon: Users },
     { title: t('sidebar.leaderboards'), url: '/dashboard/leaderboards', icon: BarChart3 },
+  ];
+
+  const competitionNavItems = [
+    {
+      title: t('sidebar.xp_competition'),
+      url: '/dashboard/competitions/xp',
+      icon: Target,
+    },
+    {
+      title: t('sidebar.bingo'),
+      url: '/dashboard/competitions/bingo',
+      icon: Grid3X3,
+    },
+  ];
+
+  const toolNavItems = [
+    {
+      title: t('sidebar.session'),
+      url: '/dashboard/session',
+      icon: Zap,
+    },
+    {
+      title: t('sidebar.tasks'),
+      url: '/dashboard/tasks',
+      icon: ListTodo,
+    },
+    {
+      title: t('sidebar.bosses'),
+      url: '/dashboard/bosses',
+      icon: Target,
+    },
   ];
 
   const handleFavouritesRedirect = (RSN: string) => navigate(`/dashboard/player/${RSN}`);
@@ -65,7 +112,7 @@ export default function DashboardSidebar() {
   };
 
   return (
-    <Sidebar collapsible='icon'>
+    <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col h-full">
         <div className="h-16 px-4 border-b border-sidebar-border flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -89,12 +136,6 @@ export default function DashboardSidebar() {
                 <DropdownMenuItem onClick={() => i18n.changeLanguage('es')}>
                   Español
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => i18n.changeLanguage('fr')}>
-                  Français
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => i18n.changeLanguage('de')}>
-                  Deutsch
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -104,6 +145,47 @@ export default function DashboardSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
+                <NavItem key={item.title} item={item} />
+              ))}
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setCompetitionsOpen(!competitionsOpen)}
+                  className="w-full justify-between hover:bg-muted/50 transition-smooth"
+                >
+                  <div className="flex items-center">
+                    <Trophy className="mr-4 h-4 w-4" />
+                    {!collapsed && <span>Competitions</span>}
+                  </div>
+                  {!collapsed && competitionsOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </SidebarMenuButton>
+                {competitionsOpen && !collapsed && (
+                  <div className="mt-1 space-y-1 ml-0">
+                    {competitionNavItems.map((item) => (
+                      <NavItem key={item.title} item={item} isSubItem />
+                    ))}
+                  </div>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {!collapsed && (
+          <div className="px-4 py-2">
+            <div className="border-t border-sidebar-border"></div>
+            <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">Tools</p>
+          </div>
+        )}
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {toolNavItems.map((item) => (
                 <NavItem key={item.title} item={item} />
               ))}
             </SidebarMenu>
@@ -118,7 +200,7 @@ export default function DashboardSidebar() {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{t("sidebar.favourites")}</span>
+                  <span className="text-sm font-medium">{t('sidebar.favourites')}</span>
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   {favourites.length === 0 ? (
@@ -130,7 +212,7 @@ export default function DashboardSidebar() {
                         onClick={() => handleFavouritesRedirect(f)}
                       >
                         <span>{f}</span>
-                        <span>2 hours ago</span>
+                        {/* <span></span> */}
                       </div>
                     ))
                   )}
