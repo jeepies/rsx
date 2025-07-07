@@ -9,10 +9,10 @@ export interface Tag {
 }
 
 interface TagsInputProps {
-  name?: string;
   value?: Tag[];
   onChange?: (tags: Tag[]) => void;
   placeholder?: string;
+  name?: string;
   maxTags?: number;
   disabled?: boolean;
   validateTag?: (tag: string) => boolean;
@@ -20,51 +20,51 @@ interface TagsInputProps {
 }
 
 export function TagsInput({
-  name,
   value = [],
   onChange,
   placeholder = 'Add a tag...',
+  name,
   maxTags,
   disabled = false,
-  validateTag = (tag) => /^[\w\-]+$/.test(tag),
+  validateTag,
   duplicateErrorMessage = 'Duplicate tag',
 }: TagsInputProps) {
   const [input, setInput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const addTag = (tagText: string) => {
-    const trimmed = tagText.trim();
+  const addTag = (label: string) => {
+    const trimmed = label.trim();
     if (!trimmed) return;
-
-    if (!validateTag(trimmed)) {
-      setError('Invalid tag format');
-      return;
-    }
 
     if (value.some((t) => t.label.toLowerCase() === trimmed.toLowerCase())) {
       setError(duplicateErrorMessage);
       return;
     }
 
-    if (maxTags && value.length >= maxTags) {
-      setError(`Maximum of ${maxTags} tags allowed`);
+    if (validateTag && !validateTag(trimmed)) {
+      setError('Invalid tag');
       return;
     }
 
-    const newTag: Tag = { label: trimmed };
+    if (maxTags && value.length >= maxTags) return;
+
+    const newTag: Tag = {
+      label: trimmed,
+      imageSrc: `https://secure.runescape.com/m=avatar-rs/${encodeURIComponent(trimmed)}/chat.png`,
+    };
+
+    setError(null);
     onChange?.([...value, newTag]);
     setInput('');
-    setError('');
   };
 
   const removeTag = (index: number) => {
     const newTags = value.filter((_, i) => i !== index);
     onChange?.(newTags);
-    setError('');
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (['Enter', ','].includes(e.key)) {
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       addTag(input);
     } else if (e.key === 'Backspace' && input === '' && value.length > 0) {
@@ -73,21 +73,17 @@ export function TagsInput({
   };
 
   return (
-    <div className="space-y-1">
+    <div>
       <div className="flex flex-wrap items-center gap-2 p-2 border rounded-md min-h-[48px]">
         {value.map((tag, index) => (
           <div
             key={index}
-            className="flex items-center gap-1 px-2 py-1 text-sm bg-muted rounded-full"
+            className="flex items-center gap-2 px-2 py-1 text-sm bg-muted rounded-full"
           >
             {tag.imageSrc && (
-              <img
-                src={tag.imageSrc}
-                alt={tag.label}
-                className="w-4 h-4 rounded-full object-cover"
-              />
+              <img src={tag.imageSrc} alt={tag.label} className="w-4 h-4 rounded-full" />
             )}
-            <span>{tag.label}</span>
+            {tag.label}
             <Button
               type="button"
               size="icon"
@@ -104,17 +100,18 @@ export function TagsInput({
         <Input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            if (error) setError(null);
+          }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
+          name={name}
         />
       </div>
-
-      {name && <input type="hidden" name={name} value={value.map((t) => t.label).join(',')} />}
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-sm mt-1">{error}</p>}
     </div>
   );
 }
