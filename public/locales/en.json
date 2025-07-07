@@ -5,6 +5,10 @@
     "total": "Total",
     "xp_gained": "XP gained"
   },
+  "auth": {
+    "login_required": "Login Required",
+    "login_required_description": "You need to be logged in to access this feature."
+  },
   "sidebar": {
     "home": "Home",
     "players": "Players",
