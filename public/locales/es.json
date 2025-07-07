@@ -14,7 +14,7 @@
   "pages": {
     "home": {
       "welcome": "Bienvenido a Nexus",
-      "motto": "Tu servicio de análisis y kit de herramientas de RuneScape 3",
+      "motto": "Tu kit de herramientas y análisis de RuneScape 3",
       "total_players_tracked": "Total de Jugadores Analizados",
       "active_session": "Sesiones Activas",
       "xp_today": "XP Ganada Hoy",
@@ -36,19 +36,19 @@
       "refresh": "Actualizar",
       "favourited": "Favoritos",
       "favourite": "Favorito",
-      "online": "Online",
-      "offline": "Offline",
+      "online": "En Línea",
+      "offline": "Desconectado",
       "total_level": "Nivel Total",
       "tabs": {
         "overview": {
           "name": "Vista General",
           "clan": "Clan",
-          "max_cape": "Max Cape",
+          "max_cape": "Capa de Complecionista",
           "days_tracked": "Días en seguimiento",
           "quest_points": "Puntos de Misión",
           "daily_xp": {
             "title": "Progreso de XP Diario",
-            "description": "Experiencia Diaria Ganada en los últimos 7 Días"
+            "description": "Experiencia Diaria Ganada en los Últimos 7 Días"
           }
         },
         "skills": {
@@ -57,8 +57,8 @@
           "levels_today": "Niveles Hoy",
           "xp_today": "XP Hoy",
           "table": {
-            "title": "Detalles de Habilidades",
-            "description": "Vista detallada de todos los niveles y experiencia de las habilidades",
+            "title": "Vista en detalle",
+            "description": "Vista detallada de todos los niveles y experiencia",
             "headers": {
               "skill": "Habilidad",
               "level": "Nivel",
@@ -80,10 +80,10 @@
             "special": "Especial"
           },
           "table": {
-            "title": "Todas las Misiones",
-            "description": "Complete list of quests with quest points and completion status",
+            "title": "Misiones",
+            "description": "Lista completa de todas las misiones, puntos de misión y progreso",
             "search_placeholder": "Buscar Misiones...",
-            "eligible_only": "Eligible Only",
+            "eligible_only": "Requisitos",
             "headers": {
               "quest_name": "Nombre de la Misión",
               "category": "Categoria",
@@ -96,41 +96,41 @@
       }
     },
     "leaderboards": {
-      "title": "Leaderboards",
-      "description": "Top RS3 players ranked by total experience and skill levels",
+      "title": "Clasificación",
+      "description": "Clasificación de los jugadores en base al total de experiencia y niveles de habilidades",
       "cards": {
         "total_players": {
-          "title": "Total Players",
-          "description": "Currently tracked"
+          "title": "Jugadores Totales",
+          "description": "Jugadores Analizados"
         },
         "maxed_players": {
-          "title": "Maxed Players",
-          "description": "99 in every skill"
+          "title": "Jugadores al Máximo",
+          "description": "han alcanzado 99 en todas las habilidades"
         },
         "weekly_xp": {
-          "title": "XP This Week",
-          "description": "Community total"
+          "title": "XP esta semana",
+          "description": "en total"
         },
         "active_today": {
-          "title": "Active Today",
-          "description": "Tracked players online"
+          "title": "Activos hoy",
+          "description": "Jugadores en línea analizados"
         }
       },
       "top_skills": {
-        "title": "Most Popular Skills",
-        "description": "Number of players with 99+ in each skill"
+        "title": "Habilidades mas populares",
+        "description": "Número de jugadores con 99+ en cada habilidad"
       },
       "top_players": {
-        "title": "Top Players",
+        "title": "Top Jugadores",
         "time_filters": {
-          "all_time": "All Time",
-          "month": "This Month",
-          "week": "This Week",
-          "today": "Today"
+          "all_time": "Sin Límite",
+          "month": "Este Mes",
+          "week": "Esta Semana",
+          "today": "Hoy"
         },
         "skill_filters": {
-          "overall": "Overall XP leaderboard",
-          "leaderboard": "leaderboard"
+          "overall": "Tabla de Experiencia Total",
+          "leaderboard": "Clasificación"
         }
       }
     }
