@@ -136,12 +136,6 @@ export default function DashboardSidebar() {
                 <DropdownMenuItem onClick={() => i18n.changeLanguage('es')}>
                   Español
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => i18n.changeLanguage('fr')}>
-                  Français
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => i18n.changeLanguage('de')}>
-                  Deutsch
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
