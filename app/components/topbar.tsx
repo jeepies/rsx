@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Clock, Search, X } from 'lucide-react';
 import { getRecentSearches, addRecentSearch, deleteRecentSearch } from '~/lib/recent-searches';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardTopbar() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function DashboardTopbar() {
   const [showRecentSearches, setShowRecentSearches] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setRecentSearches(getRecentSearches());
@@ -60,7 +62,7 @@ export default function DashboardTopbar() {
           <div className="relative flex items-center">
             <Input
               type="text"
-              placeholder="Search for a player..."
+              placeholder={t('topbar.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -77,7 +79,7 @@ export default function DashboardTopbar() {
               <div className="p-2">
                 <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground font-medium">
                   <Clock className="h-3 w-3" />
-                  Recent Searches
+                  {t('topbar.recent_searches')}
                 </div>
                 {recentSearches.map((search, index) => (
                   <div

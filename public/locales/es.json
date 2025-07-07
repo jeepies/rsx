@@ -9,6 +9,10 @@
     "login_required": "Inicio de sesión requerido",
     "login_required_description": "Necesitas iniciar sesión para poder acceder a esta herramienta."
   },
+  "topbar": {
+    "search_placeholder": "Buscar jugador...",
+    "recent_searches": "Búsquedas recientes"
+  },
   "sidebar": {
     "home": "Página Principal",
     "players": "Jugadores",
