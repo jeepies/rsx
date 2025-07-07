@@ -14,7 +14,7 @@ export interface PlayerData {
   /**
    *
    */
-  Activities: Activity[];
+  Activities?: Activity[];
   /**
    * Skills Object
    */
