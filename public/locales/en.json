@@ -94,6 +94,45 @@
           }
         }
       }
+    },
+    "leaderboards": {
+      "title": "Leaderboards",
+      "description": "Top RS3 players ranked by total experience and skill levels",
+      "cards": {
+        "total_players": {
+          "title": "Total Players",
+          "description": "Currently tracked"
+        },
+        "maxed_players": {
+          "title": "Maxed Players",
+          "description": "99 in every skill"
+        },
+        "weekly_xp": {
+          "title": "XP This Week",
+          "description": "Community total"
+        },
+        "active_today": {
+          "title": "Active Today",
+          "description": "Tracked players online"
+        }
+      },
+      "top_skills": {
+        "title": "Most Popular Skills",
+        "description": "Number of players with 99+ in each skill"
+      },
+      "top_players": {
+        "title": "Top Players",
+        "time_filters": {
+          "all_time": "All Time",
+          "month": "This Month",
+          "week": "This Week",
+          "today": "Today"
+        },
+        "skill_filters": {
+          "overall": "Overall XP leaderboard",
+          "leaderboard": "leaderboard"
+        }
+      }
     }
   }
 }
