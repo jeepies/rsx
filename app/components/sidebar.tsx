@@ -65,7 +65,7 @@ export default function DashboardSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar collapsible='icon'>
       <SidebarContent className="flex flex-col h-full">
         <div className="h-16 px-4 border-b border-sidebar-border flex items-center justify-between">
           <div className="flex items-center gap-2">

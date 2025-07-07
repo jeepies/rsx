@@ -5,6 +5,7 @@ import { RuneMetrics } from '~/services/runescape.server';
 import { IdMap, SkillCategories } from '~/~constants/Skills';
 import { CachedPlayerData, PlayerData } from '~/~types/PlayerData';
 import { getWithinTimePeriod } from './snapshot.server';
+import { start } from 'repl';
 
 function getRedisKey(username: string): string {
   return `rsn:lock:${username}`;
@@ -647,4 +648,180 @@ export async function getTrackedDaysByUsername(username: string) {
 
   const diffMs = latest.timestamp.getTime() - oldest.timestamp.getTime();
   return Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+export async function getMaxedPlayers() {
+  const players = await prisma.player.count({
+    where: {
+      snapshots: {
+        some: {
+          skills: {
+            every: {
+              level: {
+                gte: 99,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  return players;
+}
+
+export async function getActivePlayersToday() {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const players = await prisma.playerSnapshot.findMany({
+    where: {
+      timestamp: {
+        gte: startOfToday,
+      },
+    },
+    select: { playerId: true },
+  });
+
+  const uniqueIds = new Set(players.map((p) => p.playerId));
+
+  return uniqueIds.size;
+}
+
+export async function getWeeklyTotalXP() {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: { timestamp: { gte: since } },
+    orderBy: { timestamp: 'asc' },
+    select: {
+      playerId: true,
+      totalXp: true,
+    },
+  });
+
+  const byPlayer = new Map<string, { first: bigint; last: bigint }>();
+
+  for (const snapshot of snapshots) {
+    const xp = BigInt(snapshot.totalXp);
+    if (!byPlayer.has(snapshot.playerId)) {
+      byPlayer.set(snapshot.playerId, { first: xp, last: xp });
+    } else {
+      byPlayer.get(snapshot.playerId)!.last = xp;
+    }
+  }
+
+  let gain = 0n;
+
+  for (const { first, last } of byPlayer.values()) {
+    if (last > first) gain += last - first;
+  }
+
+  return Number(gain);
+}
+
+export async function getTopPopularSkills(limit = 8) {
+  const snapshots = await prisma.playerSnapshot.findMany({
+    select: {
+      playerId: true,
+      skills: {
+        select: {
+          name: true,
+          level: true,
+        },
+      },
+    },
+  });
+
+  const skillToPlayerIDs = new Map<string, Set<string>>();
+
+  for (const snap of snapshots) {
+    for (const skill of snap.skills) {
+      if (skill.level >= 99) {
+        if (!skillToPlayerIDs.has(skill.name)) {
+          skillToPlayerIDs.set(skill.name, new Set());
+        }
+        skillToPlayerIDs.get(skill.name)!.add(snap.playerId);
+      }
+    }
+  }
+
+  const result = Array.from(skillToPlayerIDs.entries())
+    .map(([skill, playerSet]) => ({
+      skill,
+      players: playerSet.size,
+    }))
+
+    .sort((a, b) => b.players - a.players)
+    .slice(0, limit);
+  return result;
+}
+
+export async function getSkillLeaderboard(skillName: string, timePeriod: string) {
+  const now = new Date();
+  let since: Date | null = null;
+
+  switch (timePeriod) {
+    case 'month':
+      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case 'week':
+      since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case 'today':
+      since = new Date();
+      since.setHours(0, 0, 0, 0);
+    case 'all_time':
+    default:
+      break;
+  }
+
+  const snapshots = await prisma.playerSnapshot.findMany({
+    where: since ? { timestamp: { gte: since } } : undefined,
+    orderBy: { timestamp: 'asc' },
+    include: {
+      player: { select: { username: true } },
+      skills: true,
+    },
+  });
+
+  const isOverall = skillName.toLowerCase() === 'overall';
+
+  const byPlayer = new Map<
+    string,
+    { username: string; first: bigint; last: bigint; level: bigint }
+  >();
+
+  for (const snapshot of snapshots) {
+    const xp = isOverall
+      ? snapshot.skills.reduce((sum, skill) => sum + BigInt(skill.xp), 0n)
+      : BigInt(snapshot.skills.find((s) => s.name === skillName)?.xp ?? 0n);
+
+    if (!byPlayer.has(snapshot.playerId)) {
+      byPlayer.set(snapshot.playerId, {
+        username: snapshot.player.username,
+        first: xp,
+        last: xp,
+        level: snapshot.totalSkill,
+      });
+    } else {
+      byPlayer.get(snapshot.playerId)!.last = xp;
+    }
+  }
+
+  const leaderboard = Array.from(byPlayer.values())
+    .map((entry) => ({
+      player: entry.username,
+      xp: Number(entry.last),
+      gained: Number(entry.last - entry.first),
+      level: Number(entry.level),
+    }))
+    .filter((entry) => entry.gained > 0)
+    .sort((a, b) => b.gained - a.gained)
+    .map((entry, idx) => ({
+      rank: idx + 1,
+      player: entry.player,
+      xp: entry.xp,
+      gained: entry.gained,
+      level: entry.level,
+    }));
+
+  return leaderboard;
 }
