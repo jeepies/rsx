@@ -107,6 +107,9 @@ export class RuneMetrics {
 export class Runescape {
   private static BASE_URL = 'https://secure.runescape.com';
 
+  private static parse = (str: string) =>
+    JSON.parse(str.replace('jQuery000000000000000_0000000000(', '').replace(');', ''));
+
   // TODO: Cache and save clan data to database
   static async getPlayerClanName(username: string) {
     const url =
@@ -115,12 +118,33 @@ export class Runescape {
 
     const result = await fetch(url);
     try {
-      const clan = JSON.parse(
-        (await result.text()).replace('jQuery000000000000000_0000000000(', '').replace(');', ''),
-      )[0].clan;
+      const clan = this.parse(await result.text())[0].clan;
       return clan;
     } catch {
       return 'N/A';
+    }
+  }
+
+  static async checkExistence(usernames: string[]): Promise<Map<string, boolean> | undefined> {
+    const parsedUsernames = encodeURIComponent(JSON.stringify(usernames));
+    const url =
+      this.BASE_URL +
+      `/m=website-data/playerDetails.ws?names=${parsedUsernames}&callback=jQuery000000000000000_0000000000&_=0`;
+
+    const users = new Map<string, boolean>();
+
+    try {
+      const result = await fetch(url);
+      const text = await result.text();
+      const data = this.parse(text);
+      const foundNames = new Set(data.map((entry: any) => entry.name.toLowerCase()));
+      for (const username of usernames) {
+        users.set(username, foundNames.has(username.toLowerCase()));
+      }
+
+      return users;
+    } catch {
+      return undefined;
     }
   }
 }
