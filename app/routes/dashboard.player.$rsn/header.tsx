@@ -9,17 +9,22 @@ import { Card, CardHeader } from '~/components/ui/card';
 import { Tooltip } from '~/components/ui/tooltip';
 import { PlayerData } from '~/~types/PlayerData';
 import { useTranslation } from 'react-i18next';
+import { formatDistance } from 'date-fns';
+import RefreshProfileButton from './refresh-button';
 
 export interface HeaderComponentProps {
   data: {
     player: PlayerData;
+    refreshInfo: {
+      refreshable: boolean;
+      refreshable_at: Date | null;
+    };
     chatheadURI: string;
   };
 }
 
 export default function Header(props: Readonly<HeaderComponentProps>) {
-  const { player } = props.data;
-  const fetcher = useFetcher();
+  const { player, refreshInfo } = props.data;
   const { t } = useTranslation();
 
   return (
@@ -47,29 +52,7 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <fetcher.Form method="get" action={`/api/refresh/${player.Username}`}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 flex-1 sm:flex-none"
-                    type="submit"
-                    disabled={true}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    <span className="hidden sm:inline">{t('pages.player_profile.refresh')}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {/* <p>
-                    {canRefresh
-                      ? 'Refresh this users data'
-                      : formatDistance(now, refreshTimestampDate, { includeSeconds: true })}
-                  </p> */}
-                </TooltipContent>
-              </Tooltip>
-            </fetcher.Form>
+            <RefreshProfileButton refreshInfo={props.data.refreshInfo} username={player.Username}/>
             <FavouriteProfileButton RSN={player.Username} />
           </div>
         </div>
