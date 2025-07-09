@@ -36,8 +36,9 @@ model PlayerSnapshot {
   playerId String
   player   Player @relation(fields: [playerId], references: [id])
 
-  skills SkillSnapshot[]
-  quests QuestSnapshot[]
+  skills     SkillSnapshot[]
+  quests     QuestSnapshot[]
+  activities ActivitySnapshot[]
 
   @@index([playerId, timestamp])
 }
@@ -64,6 +65,27 @@ model QuestSnapshot {
   members      Boolean
   questPoints  Int
   userEligible Boolean
+}
+
+model ActivitySnapshot {
+  id         String         @id @default(cuid())
+  snapshotId String
+  snapshot   PlayerSnapshot @relation(fields: [snapshotId], references: [id])
+
+  date    DateTime
+  details String
+  text    String
+  token   String       @unique
+  type    ActivityType
+}
+
+enum ActivityType {
+  DROP
+  KILL
+  QUEST
+  LEVEL_UP
+  CLAN
+  TREASURE_TRAIL
 }
 
 enum SkillName {

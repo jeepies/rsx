@@ -77,6 +77,7 @@ export class RuneMetrics {
         Rank: profile.rank,
         Skills: mappedSkills,
       },
+      Activities: profile.activities,
       Quests: {
         Completed: profile.questscomplete,
         InProgress: profile.questsstarted,
