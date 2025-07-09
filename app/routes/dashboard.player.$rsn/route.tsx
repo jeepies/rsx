@@ -10,6 +10,7 @@ import {
 import PlayerNotFound from './not-found';
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
+  canRefresh,
   getDailyLevelIncreases,
   getDailyXpIncreases,
   getFreshestData,
@@ -44,17 +45,19 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const player: PlayerData = sanitizeBigInts(data);
 
-  const [weeklyXp, dailyXP, dailyLevels, daysTracked] = await Promise.all([
+  const [weeklyXp, dailyXP, dailyLevels, daysTracked, refreshInfo] = await Promise.all([
     getWeeklyXpByDay(rsn),
     getDailyXpIncreases(rsn),
     getDailyLevelIncreases(rsn),
     getTrackedDaysByUsername(rsn),
+    canRefresh(rsn),
   ]);
 
   const clanName = (await Runescape.getPlayerClanName(rsn)) ?? 'N/A';
 
   return {
     player,
+    refreshInfo,
     stats: {
       weeklyXp,
       dailyXP,
