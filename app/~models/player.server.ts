@@ -3,9 +3,8 @@ import { prisma } from '~/services/prisma.server';
 import redis from '~/services/redis.server';
 import { RuneMetrics } from '~/services/runescape.server';
 import { IdMap, SkillCategories } from '~/~constants/Skills';
-import { CachedPlayerData, PlayerData } from '~/~types/PlayerData';
+import { PlayerData } from '~/~types/PlayerData';
 import { getWithinTimePeriod } from './snapshot.server';
-import { start } from 'repl';
 
 function getRedisKey(username: string): string {
   return `rsn:lock:${username}`;
@@ -15,10 +14,39 @@ function getCacheKey(username: string): string {
   return `rsn:fresh:${username}`;
 }
 
-export async function canRefresh(username: string): Promise<boolean> {
-  // check if there is a lock for this username in redis
-  const isLocked = await redis.get(getRedisKey(username));
-  return !isLocked;
+export async function canRefresh(
+  username: string,
+): Promise<{ refreshable: boolean; refreshable_at: Date | null }> {
+  const redisKey = getRedisKey(username);
+  const isLocked = await redis.get(redisKey);
+
+  if (!isLocked) {
+    return {
+      refreshable: true,
+      refreshable_at: new Date(),
+    };
+  }
+
+  const ttlSeconds = await redis.ttl(redisKey);
+
+  if (ttlSeconds === -2) {
+    return {
+      refreshable: true,
+      refreshable_at: new Date(),
+    };
+  }
+
+  if (ttlSeconds === -1) {
+    return {
+      refreshable: false,
+      refreshable_at: null,
+    };
+  }
+
+  return {
+    refreshable: false,
+    refreshable_at: new Date(Date.now() + ttlSeconds * 1000),
+  };
 }
 
 export async function commitLock(username: string): Promise<void> {
