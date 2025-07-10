@@ -50,7 +50,7 @@
     "player_profile": {
       "refresh": "Actualizar",
       "refreshing": "Actualizando...",
-      "refresh_tooltip": "Actualizar la información the de este jugador",
+      "refresh_tooltip": "Actualizar la información de este jugador",
       "refresh_success": "Información actualizada correctamente",
       "refresh_failed": "Fallo al intentar actualizar la información del jugador. Por favor, intentelo de nuevo, o contactenos en nuestro Discord",
       "favourited": "Favoritos",
