@@ -2,12 +2,13 @@ import config from '~/~services/config.server';
 import { prisma } from '~/~services/prisma.server';
 import { SkillCategories } from '~/~constants/Skills';
 import { getWithinTimePeriod } from './snapshot.server';
+import { dropInitialSpike } from '~/lib/server/utils.server';
 
 export async function getWeeklyXpByDay(username: string) {
   const now = new Date();
   const startDate = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
 
-  const snapshots = await prisma.playerSnapshot.findMany({
+  const rawSnapshots = await prisma.playerSnapshot.findMany({
     where: {
       player: { username },
       timestamp: { gte: startDate },
@@ -16,12 +17,7 @@ export async function getWeeklyXpByDay(username: string) {
     select: { totalXp: true, timestamp: true },
   });
 
-  if (snapshots.length === 0) {
-    return Array.from({ length: 7 }, (_, i) => ({
-      date: `Day ${i + 1}`,
-      dailyXP: 0,
-    }));
-  }
+  const snapshots = dropInitialSpike(rawSnapshots);
 
   const snapshotsByDate = new Map<string, { totalXp: bigint; timestamp: Date }>();
 
@@ -29,35 +25,26 @@ export async function getWeeklyXpByDay(username: string) {
     const dateKey = snap.timestamp.toISOString().slice(0, 10);
     const existing = snapshotsByDate.get(dateKey);
     if (!existing || snap.timestamp > existing.timestamp) {
-      snapshotsByDate.set(dateKey, {
-        totalXp: BigInt(snap.totalXp),
-        timestamp: snap.timestamp,
-      });
+      snapshotsByDate.set(dateKey, snap);
     }
   }
 
-  const dateStrings: string[] = [];
-  for (let i = 7; i >= 1; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    dateStrings.push(d.toISOString().slice(0, 10));
-  }
-
-  const day0Date = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
-  const day0Key = day0Date.toISOString().slice(0, 10);
-  const day0Xp = snapshotsByDate.get(day0Key)?.totalXp ?? 0n;
-
   const xpData = [];
+  let prevXp: bigint | null = null;
 
-  let prevXp = day0Xp;
+  for (let i = 7; i >= 1; i--) {
+    const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    const key = day.toISOString().slice(0, 10);
+    const current = snapshotsByDate.get(key)?.totalXp;
 
-  for (let i = 0; i < dateStrings.length; i++) {
-    const xpForDay = snapshotsByDate.get(dateStrings[i])?.totalXp ?? prevXp;
-    const dailyXp = xpForDay - prevXp;
-    xpData.push({
-      date: `Day ${i + 1}`,
-      dailyXP: Number(dailyXp > 0n ? dailyXp : 0n),
-    });
-    prevXp = xpForDay;
+    if (prevXp === null || current === undefined) {
+      xpData.push({ date: `Day ${8 - i}`, dailyXP: 0 });
+    } else {
+      const diff = current - prevXp;
+      xpData.push({ date: `Day ${8 - i}`, dailyXP: Number(diff > 0n ? diff : 0n) });
+    }
+
+    if (current !== undefined) prevXp = current;
   }
 
   return xpData;
