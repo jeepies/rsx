@@ -58,6 +58,7 @@
       "favourite": "Favourite",
       "online": "Online",
       "offline": "Offline",
+      "inactive": "Inactive",
       "total_level": "Total Level",
       "tabs": {
         "overview": {

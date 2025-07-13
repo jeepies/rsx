@@ -595,3 +595,42 @@ export async function getSkillLeaderboard(skillName: string, timePeriod: string)
 
   return leaderboard;
 }
+
+export async function getPlayerStatus(
+  username: string,
+): Promise<'ONLINE' | 'OFFLINE' | 'INACTIVE'> {
+  const player = await prisma.player.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+
+  if (!player) return 'INACTIVE';
+
+  const recentSnapshots = await prisma.playerSnapshot.findMany({
+    where: { playerId: player.id },
+    orderBy: { timestamp: 'desc' },
+    take: 10,
+    select: { totalXp: true, timestamp: true },
+  });
+
+  if (recentSnapshots.length < 2) return 'INACTIVE';
+
+  let latestActivity: Date | null = null;
+
+  for (let i = 0; i < recentSnapshots.length - 1; i++) {
+    const current = BigInt(recentSnapshots[i].totalXp);
+    const prev = BigInt(recentSnapshots[i + 1].totalXp);
+    if (current > prev) {
+      latestActivity = recentSnapshots[i].timestamp;
+      break;
+    }
+  }
+
+  if (!latestActivity) return 'INACTIVE';
+
+  const daysSince = Math.floor((Date.now() - latestActivity.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (daysSince < 15) return 'ONLINE';
+  if (daysSince < 30) return 'OFFLINE';
+  return 'INACTIVE';
+}
