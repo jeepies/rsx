@@ -155,7 +155,7 @@ export default function DashboardSidebar() {
                 >
                   <div className="flex items-center">
                     <Trophy className="mr-4 h-4 w-4" />
-                    {!collapsed && <span>Competitions</span>}
+                    {!collapsed && <span>{t('sidebar.competitions')}</span>}
                   </div>
                   {!collapsed && competitionsOpen ? (
                     <ChevronUp className="h-4 w-4" />
