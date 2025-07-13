@@ -1,7 +1,6 @@
 import config from '~/~services/config.server';
-import { prisma } from '~/~services/prisma.server';
 import redis from '~/~services/redis.server';
-import { RuneMetrics, Runescape } from '~/~services/runescape.server';
+import { RuneMetrics } from '~/~services/runescape.server';
 import { PlayerData } from '~/~types/PlayerData';
 
 export class PlayerDataFetcher {
