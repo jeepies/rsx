@@ -86,6 +86,11 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
     return password;
   };
 
+  const nameToImageURI = (item: string) => {
+    const name = (item ?? "").replaceAll(' ', '_') + '_detail.png';
+    return `https://runescape.wiki/images/${name}`;
+  };
+
   const renderStepOne = () => {
     return (
       <>
@@ -269,6 +274,7 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                     setStep(-1);
                   }}
                 >
+                  {items[i] !== "" && <img className='w-24 h-24' src={nameToImageURI(NormalizedDropsToDrops[items[i]])} alt={items[i]}/>}
                   {NormalizedDropsToDrops[items[i]]}
                 </div>
               ))}
