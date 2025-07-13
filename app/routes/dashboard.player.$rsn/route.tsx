@@ -11,10 +11,8 @@ import {
 import PlayerNotFound from './not-found';
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
-  canRefresh,
   getDailyLevelIncreases,
   getDailyXpIncreases,
-  getFreshestData,
   getTrackedDaysByUsername,
   getWeeklyXpByDay,
 } from '~/~models/player.server';
