@@ -1,6 +1,7 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
 import {
   isRouteErrorResponse,
+  MetaFunction,
   useLoaderData,
   useLocation,
   useNavigation,
@@ -29,6 +30,11 @@ import QuestsTab from './tabs/quests';
 import { useState, useRef, useEffect } from 'react';
 import { PlayerProfileSkeleton } from './skeleton';
 import { useTranslation } from 'react-i18next';
+
+export const meta: MetaFunction = () => {
+  const params = useParams();
+  return [{ title: `${params.rsn} | Nexus` }];
+};
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
@@ -113,13 +119,13 @@ export default function PlayerProfile() {
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 h-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">
-            {t("pages.player_profile.tabs.overview.name")}
+            {t('pages.player_profile.tabs.overview.name')}
           </TabsTrigger>
           <TabsTrigger value="skills" className="text-xs sm:text-sm py-2">
-          {t("pages.player_profile.tabs.skills.name")}
+            {t('pages.player_profile.tabs.skills.name')}
           </TabsTrigger>
           <TabsTrigger value="quests" className="text-xs sm:text-sm py-2">
-          {t("pages.player_profile.tabs.quests.name")}
+            {t('pages.player_profile.tabs.quests.name')}
           </TabsTrigger>
         </TabsList>
 
