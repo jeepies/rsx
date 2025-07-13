@@ -10,11 +10,10 @@ import type { RefreshProfileResponse } from '~/~types/API';
 
 export interface RefreshProfileButtonProps {
   username: string;
-  refreshInfo: {
-    refreshable: boolean;
-    refreshable_at: Date | null;
-  };
+  refreshInfo: number;
 }
+
+const MANUAL_REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
 
 export default function RefreshProfileButton(props: Readonly<RefreshProfileButtonProps>) {
   const { username, refreshInfo } = props;
@@ -22,6 +21,12 @@ export default function RefreshProfileButton(props: Readonly<RefreshProfileButto
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const shownToastRef = useRef(false);
+
+  const now = Date.now();
+  const lastRefresh = refreshInfo || 0;
+
+  const refreshable = now - lastRefresh >= MANUAL_REFRESH_COOLDOWN_MS;
+  const refreshableAt = new Date(lastRefresh + MANUAL_REFRESH_COOLDOWN_MS);
 
   useEffect(() => {
     if (fetcher.state === 'submitting') {
@@ -44,8 +49,6 @@ export default function RefreshProfileButton(props: Readonly<RefreshProfileButto
     }
   }, [fetcher.state, fetcher.data]);
 
-  const now = new Date();
-
   return (
     <fetcher.Form method="post" action={`/api/refresh/${username}`}>
       <Tooltip>
@@ -55,7 +58,7 @@ export default function RefreshProfileButton(props: Readonly<RefreshProfileButto
             size="sm"
             className="flex items-center gap-2 flex-1 sm:flex-none"
             type="submit"
-            disabled={!refreshInfo.refreshable || isRefreshing}
+            disabled={!refreshable || isRefreshing}
           >
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">
@@ -67,9 +70,9 @@ export default function RefreshProfileButton(props: Readonly<RefreshProfileButto
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {refreshInfo.refreshable
+            {refreshable
               ? t('pages.player_profile.refresh_tooltip')
-              : formatDistance(now, refreshInfo.refreshable_at!, { includeSeconds: true })}
+              : formatDistance(now, refreshableAt.getTime(), { includeSeconds: true })}
           </p>
         </TooltipContent>
       </Tooltip>

@@ -4,7 +4,7 @@ import redis from '~/~services/redis.server';
 import { RuneMetrics, Runescape } from '~/~services/runescape.server';
 import { PlayerData } from '~/~types/PlayerData';
 
-class PlayerDataFetcher {
+export class PlayerDataFetcher {
   // #region Variables
   /**
    * Redis key for caching player data JSON string
@@ -138,6 +138,7 @@ class PlayerDataFetcher {
     const manualCooldownPassed = now - lastManualRefresh >= this.CACHE_MANUAL_TTL;
 
     if (manual && manualCooldownPassed) {
+      // manual cooldown passed and the request was a manual refresh
       const freshData = await this.fetchFreshData();
       await this.setCachedData(freshData);
       await this.setTimestamp(this.LAST_FETCH_KEY, now);
@@ -146,6 +147,7 @@ class PlayerDataFetcher {
     }
 
     if (cacheIsFresh) {
+      // cache data is perfectly fine
       const cachedData = await this.getCachedData();
       if (cachedData) return cachedData;
     }

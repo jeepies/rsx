@@ -15,10 +15,7 @@ import RefreshProfileButton from './refresh-button';
 export interface HeaderComponentProps {
   data: {
     player: PlayerData;
-    refreshInfo: {
-      refreshable: boolean;
-      refreshable_at: Date | null;
-    };
+    refreshInfo: number
     chatheadURI: string;
   };
 }
