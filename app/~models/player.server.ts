@@ -1,7 +1,7 @@
-import config from '~/services/config.server';
-import { prisma } from '~/services/prisma.server';
-import redis from '~/services/redis.server';
-import { RuneMetrics } from '~/services/runescape.server';
+import config from '~/~services/config.server';
+import { prisma } from '~/~services/prisma.server';
+import redis from '~/~services/redis.server';
+import { RuneMetrics } from '~/~services/runescape.server';
 import { IdMap, SkillCategories } from '~/~constants/Skills';
 import { PlayerData } from '~/~types/PlayerData';
 import { getWithinTimePeriod } from './snapshot.server';

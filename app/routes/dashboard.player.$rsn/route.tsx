@@ -18,10 +18,10 @@ import {
   getTrackedDaysByUsername,
   getWeeklyXpByDay,
 } from '~/~models/player.server';
-import { prisma } from '~/services/prisma.server';
+import { prisma } from '~/~services/prisma.server';
 import { sanitizeBigInts } from '~/lib/utils';
 import { PlayerData } from '~/~types/PlayerData';
-import { RuneMetrics, Runescape } from '~/services/runescape.server';
+import { RuneMetrics, Runescape } from '~/~services/runescape.server';
 import Header from './header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';

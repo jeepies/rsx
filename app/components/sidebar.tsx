@@ -32,7 +32,7 @@ import {
 import { Button } from '~/components/ui/button';
 import { NavLink, useNavigate } from '@remix-run/react';
 import { Card, CardContent } from './ui/card';
-import { useFavourites } from '~/contexts/favourites';
+import { useFavourites } from '~/~contexts/favourites';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
