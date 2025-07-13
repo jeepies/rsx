@@ -7,10 +7,25 @@ interface Config {
    * Everything should be in ms
    */
   TIMINGS: {
+    /**
+     * Redis fetch lock - 0.5 minutes by default
+     */
     FETCH_LOCK: number;
+    /**
+     * Redis cached data TTL before server can refresh - 15 minutes by default
+     */
     AUTO_REFRESH: number;
+    /**
+     * Redis cached data TTL before user can refresh - 5 minutes by default
+     */
     MANUAL_REFRESH: number;
+    /**
+     * Minimum time to display loading skeleton for, to prevent flickering - 400ms by default
+     */
     MIN_SKELETON_TIME: number;
+    /**
+     * Hours per day. Should always be 24.
+     */
     HOURS_PER_DAY: number;
   };
 }
