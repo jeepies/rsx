@@ -16,7 +16,7 @@ export interface HeaderComponentProps {
   data: {
     player: PlayerData;
     refreshInfo: number;
-    chatheadURI: string;
+    status: string;
   };
 }
 
@@ -47,18 +47,26 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
               <h1 className="text-xl sm:text-3xl font-bold truncate">{player.Username}</h1>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                  {player.LoggedIn ? (
+                  {props.data.status === 'ONLINE' && (
                     <>
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       {t('pages.player_profile.online')}
                     </>
-                  ) : (
+                  )}
+                  {props.data.status === 'OFFLINE' && (
                     <>
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
                       {t('pages.player_profile.offline')}
                     </>
                   )}
+                  {props.data.status === 'INACTIVE' && (
+                    <>
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      {t('pages.player_profile.inactive')}
+                    </>
+                  )}
                 </Badge>
+
                 <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
                   <RefreshCw className="h-3 w-3" />
                   {lastUpdatedText}

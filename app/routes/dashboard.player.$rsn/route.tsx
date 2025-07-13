@@ -13,6 +13,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/ca
 import {
   getDailyLevelIncreases,
   getDailyXpIncreases,
+  getPlayerStatus,
   getTrackedDaysByUsername,
   getWeeklyXpByDay,
 } from '~/~models/player.server';
@@ -54,18 +55,20 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const player: PlayerData = sanitizeBigInts(data);
 
-  const [weeklyXp, dailyXP, dailyLevels, daysTracked, refreshInfo] = await Promise.all([
+  const [weeklyXp, dailyXP, dailyLevels, daysTracked, refreshInfo, status] = await Promise.all([
     getWeeklyXpByDay(rsn),
     getDailyXpIncreases(rsn),
     getDailyLevelIncreases(rsn),
     getTrackedDaysByUsername(rsn),
     fetcher.getLastRefresh(),
+    getPlayerStatus(rsn),
   ]);
 
   const clanName = (await Runescape.getPlayerClanName(rsn)) ?? 'N/A';
 
   return {
     player,
+    status,
     refreshInfo,
     stats: {
       weeklyXp,

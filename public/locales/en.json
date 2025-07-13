@@ -56,8 +56,9 @@
       "refresh_failed": "Failed to refresh this players data. Please try again, or contact us on discord",
       "favourited": "Favourited",
       "favourite": "Favourite",
-      "online": "Online",
-      "offline": "Offline",
+      "online": "Active",
+      "offline": "Dormant",
+      "inactive": "Inactive",
       "total_level": "Total Level",
       "tabs": {
         "overview": {
