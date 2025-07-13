@@ -12,3 +12,11 @@ export function sanitizeBigInts(obj: any): any {
   }
   return obj;
 }
+
+export function dropInitialSpike(snapshots: { totalXp: bigint; timestamp: Date }[]) {
+  if (snapshots.length < 2) return [];
+
+  const firstXp = snapshots[0].totalXp;
+  const firstChangeIndex = snapshots.findIndex((s) => s.totalXp !== firstXp);
+  return firstChangeIndex === -1 ? [] : snapshots.slice(firstChangeIndex);
+}

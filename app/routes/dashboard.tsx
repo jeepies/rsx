@@ -2,7 +2,7 @@ import { MetaFunction, Outlet } from '@remix-run/react';
 import DashboardSidebar from '~/components/sidebar';
 import DashboardTopbar from '~/components/topbar';
 import { SidebarProvider } from '~/components/ui/sidebar';
-import { FavouritesProvider } from '~/contexts/favourites';
+import { FavouritesProvider } from '~/~contexts/favourites';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
 import { Toaster } from 'sonner';

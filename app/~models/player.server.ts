@@ -1,277 +1,14 @@
-import config from '~/services/config.server';
-import { prisma } from '~/services/prisma.server';
-import redis from '~/services/redis.server';
-import { RuneMetrics } from '~/services/runescape.server';
-import { IdMap, SkillCategories } from '~/~constants/Skills';
-import { PlayerData } from '~/~types/PlayerData';
+import config from '~/~services/config.server';
+import { prisma } from '~/~services/prisma.server';
+import { SkillCategories } from '~/~constants/Skills';
 import { getWithinTimePeriod } from './snapshot.server';
-
-function getRedisKey(username: string): string {
-  return `rsn:lock:${username}`;
-}
-
-function getCacheKey(username: string): string {
-  return `rsn:fresh:${username}`;
-}
-
-export async function canRefresh(
-  username: string,
-): Promise<{ refreshable: boolean; refreshable_at: Date | null }> {
-  const redisKey = getRedisKey(username);
-  const isLocked = await redis.get(redisKey);
-
-  if (!isLocked) {
-    return {
-      refreshable: true,
-      refreshable_at: new Date(),
-    };
-  }
-
-  const ttlSeconds = await redis.ttl(redisKey);
-
-  if (ttlSeconds === -2) {
-    return {
-      refreshable: true,
-      refreshable_at: new Date(),
-    };
-  }
-
-  if (ttlSeconds === -1) {
-    return {
-      refreshable: false,
-      refreshable_at: null,
-    };
-  }
-
-  return {
-    refreshable: false,
-    refreshable_at: new Date(Date.now() + ttlSeconds * 1000),
-  };
-}
-
-export async function commitLock(username: string): Promise<void> {
-  // set a lock key in redis with expiry to prevent concurrent refreshes
-  await redis.set(getRedisKey(username), '1', {
-    expiration: { type: 'PX', value: config.TIMINGS.FETCH_LOCK },
-  });
-}
-
-export async function getFreshestData(username: string) {
-  const cacheKey = getCacheKey(username);
-
-  // try to get cached data from redis
-  const cachedRaw = await redis.get(cacheKey);
-  if (cachedRaw) {
-    try {
-      const cached = JSON.parse(cachedRaw) as {
-        data: PlayerData | string;
-        fetchedAt: number;
-      };
-      const now = Date.now();
-      // if cached data is still fresh, return it
-      if (cached.fetchedAt + config.TIMINGS.AUTO_REFRESH > now) {
-        return cached.data;
-      }
-    } catch {
-      // corrupted cache data, just ignore and continue
-    }
-  }
-
-  // ensure player exists in database or create new
-  const playerRow = await prisma.player.upsert({
-    where: { username },
-    update: {},
-    create: {
-      username,
-      lastFetchedAt: new Date(),
-    },
-  });
-
-  // only proceed if no lock exists for this username
-  if (await canRefresh(username)) {
-    // commit a lock to prevent other refreshes during this operation
-    await commitLock(username);
-
-    try {
-      // fetch fresh profile data from RuneMetrics
-      const data = await RuneMetrics.getFullProfile(username);
-
-      // if RuneMetrics returns a string (likely an error), release lock and return it
-      if (typeof data === 'string') {
-        await redis.del(getRedisKey(username));
-        return data;
-      }
-
-      // create a new snapshot in the database for this fresh data
-      await prisma.playerSnapshot.create({
-        data: {
-          playerId: playerRow.id,
-          timestamp: new Date(),
-          rank: Number(data.Skills.Rank.replace(/,/g, '')),
-          totalXp: data.Skills.XP,
-          totalSkill: data.Skills.Level,
-          combatLevel: data.Skills.CombatLevel,
-          loggedIn: data.LoggedIn,
-          quests_completed: data.Quests.Completed,
-          quests_in_progress: data.Quests.InProgress,
-          quests_not_started: data.Quests.NotStarted,
-          skills: {
-            create: data.Skills.Skills.map((skill) => ({
-              name: skill.HumanName as any,
-              xp: skill.XP,
-              rank: skill.Rank,
-              level: skill.Level,
-            })),
-          },
-          quests: {
-            create: data.Quests.Quests.map((quest) => ({
-              title: quest.Title,
-              difficulty: quest.Difficulty,
-              status: quest.Status,
-              members: quest.Members,
-              questPoints: quest.QuestPoints,
-              userEligible: quest.Eligible,
-            })),
-          },
-        },
-      });
-
-      // update player's last fetched timestamp
-      await prisma.player.update({
-        where: { id: playerRow.id },
-        data: { lastFetchedAt: new Date() },
-      });
-
-      // cache fresh data in redis with expiry for auto-refresh window
-      await redis.set(
-        cacheKey,
-        JSON.stringify({
-          data,
-          fetchedAt: Date.now(),
-        }),
-        {
-          expiration: {
-            type: 'PX',
-            value: config.TIMINGS.AUTO_REFRESH,
-          },
-        },
-      );
-
-      // release the redis lock now that refresh is complete
-      await redis.del(getRedisKey(username));
-
-      return data;
-    } catch {
-      // on any error during refresh, release the lock to avoid deadlock
-      await redis.del(getRedisKey(username));
-    }
-
-    // if fetching fresh data failed, try to return the latest snapshot from the DB
-    const playerWithSnapshots = await prisma.player.findUnique({
-      where: { username },
-      include: {
-        snapshots: {
-          orderBy: { timestamp: 'desc' },
-          take: 1,
-          include: { skills: true, quests: true },
-        },
-      },
-    });
-
-    if (playerWithSnapshots && playerWithSnapshots.snapshots.length) {
-      const latest = playerWithSnapshots.snapshots[0];
-
-      // reconstruct PlayerData shape from latest snapshot DB data
-      const player: PlayerData = {
-        Username: playerWithSnapshots.username,
-        LoggedIn: latest.loggedIn,
-        Skills: {
-          Level: latest.totalSkill,
-          CombatLevel: latest.combatLevel,
-          XP: latest.totalXp,
-          Rank: latest.rank.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-          Skills: latest.skills.map((skill) => ({
-            JagexID: IdMap[skill.name] ?? -1,
-            HumanName: skill.name,
-            Level: BigInt(skill.level),
-            XP: BigInt(skill.xp),
-            Rank: skill.rank,
-          })),
-        },
-        Quests: {
-          Completed: latest.quests_completed,
-          InProgress: latest.quests_in_progress,
-          NotStarted: latest.quests_not_started,
-          Quests: latest.quests.map((quest) => ({
-            Title: quest.title,
-            Difficulty: quest.difficulty,
-            Status: quest.status as 'COMPLETED' | 'STARTED' | 'NOT_STARTED',
-            Members: quest.members,
-            QuestPoints: quest.questPoints,
-            Eligible: quest.userEligible,
-          })),
-        },
-      };
-
-      return player;
-    }
-
-    // if no snapshot found, return a fallback empty player data
-    return {
-      Username: playerRow.username,
-      LoggedIn: false,
-      Skills: {
-        Level: 0n,
-        CombatLevel: 0n,
-        XP: 0n,
-        Rank: '',
-        Skills: [],
-      },
-      Quests: {
-        Completed: 0,
-        InProgress: 0,
-        NotStarted: 0,
-        Quests: [],
-      },
-    };
-  }
-
-  // if can't refresh due to lock, try returning cached data anyway to avoid empty responses
-  const cachedRawFallback = await redis.get(cacheKey);
-  if (cachedRawFallback) {
-    try {
-      const cached = JSON.parse(cachedRawFallback);
-      return cached.data;
-    } catch {
-      // corrupted cache, ignore
-    }
-  }
-
-  // final fallback empty player if nothing else works
-  return {
-    Username: username,
-    LoggedIn: false,
-    Skills: {
-      Level: 0n,
-      CombatLevel: 0n,
-      XP: 0n,
-      Rank: '',
-      Skills: [],
-    },
-    Quests: {
-      Completed: 0,
-      InProgress: 0,
-      NotStarted: 0,
-      Quests: [],
-    },
-  };
-}
+import { dropInitialSpike } from '~/lib/server/utils.server';
 
 export async function getWeeklyXpByDay(username: string) {
   const now = new Date();
   const startDate = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
 
-  const snapshots = await prisma.playerSnapshot.findMany({
+  const rawSnapshots = await prisma.playerSnapshot.findMany({
     where: {
       player: { username },
       timestamp: { gte: startDate },
@@ -280,12 +17,7 @@ export async function getWeeklyXpByDay(username: string) {
     select: { totalXp: true, timestamp: true },
   });
 
-  if (snapshots.length === 0) {
-    return Array.from({ length: 7 }, (_, i) => ({
-      date: `Day ${i + 1}`,
-      dailyXP: 0,
-    }));
-  }
+  const snapshots = dropInitialSpike(rawSnapshots);
 
   const snapshotsByDate = new Map<string, { totalXp: bigint; timestamp: Date }>();
 
@@ -293,35 +25,26 @@ export async function getWeeklyXpByDay(username: string) {
     const dateKey = snap.timestamp.toISOString().slice(0, 10);
     const existing = snapshotsByDate.get(dateKey);
     if (!existing || snap.timestamp > existing.timestamp) {
-      snapshotsByDate.set(dateKey, {
-        totalXp: BigInt(snap.totalXp),
-        timestamp: snap.timestamp,
-      });
+      snapshotsByDate.set(dateKey, snap);
     }
   }
 
-  const dateStrings: string[] = [];
-  for (let i = 7; i >= 1; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    dateStrings.push(d.toISOString().slice(0, 10));
-  }
-
-  const day0Date = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
-  const day0Key = day0Date.toISOString().slice(0, 10);
-  const day0Xp = snapshotsByDate.get(day0Key)?.totalXp ?? 0n;
-
   const xpData = [];
+  let prevXp: bigint | null = null;
 
-  let prevXp = day0Xp;
+  for (let i = 7; i >= 1; i--) {
+    const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    const key = day.toISOString().slice(0, 10);
+    const current = snapshotsByDate.get(key)?.totalXp;
 
-  for (let i = 0; i < dateStrings.length; i++) {
-    const xpForDay = snapshotsByDate.get(dateStrings[i])?.totalXp ?? prevXp;
-    const dailyXp = xpForDay - prevXp;
-    xpData.push({
-      date: `Day ${i + 1}`,
-      dailyXP: Number(dailyXp > 0n ? dailyXp : 0n),
-    });
-    prevXp = xpForDay;
+    if (prevXp === null || current === undefined) {
+      xpData.push({ date: `Day ${8 - i}`, dailyXP: 0 });
+    } else {
+      const diff = current - prevXp;
+      xpData.push({ date: `Day ${8 - i}`, dailyXP: Number(diff > 0n ? diff : 0n) });
+    }
+
+    if (current !== undefined) prevXp = current;
   }
 
   return xpData;

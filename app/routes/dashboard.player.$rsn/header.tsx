@@ -15,10 +15,7 @@ import RefreshProfileButton from './refresh-button';
 export interface HeaderComponentProps {
   data: {
     player: PlayerData;
-    refreshInfo: {
-      refreshable: boolean;
-      refreshable_at: Date | null;
-    };
+    refreshInfo: number;
     chatheadURI: string;
   };
 }
@@ -26,6 +23,11 @@ export interface HeaderComponentProps {
 export default function Header(props: Readonly<HeaderComponentProps>) {
   const { player, refreshInfo } = props.data;
   const { t } = useTranslation();
+
+  const lastUpdatedText = formatDistance(refreshInfo, Date.now(), {
+    includeSeconds: true,
+    addSuffix: true,
+  });
 
   return (
     <Card className="animate-fade-in">
@@ -45,14 +47,27 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
               <h1 className="text-xl sm:text-3xl font-bold truncate">{player.Username}</h1>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  {t('pages.player_profile.online')}
+                  {player.LoggedIn ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      {t('pages.player_profile.online')}
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      {t('pages.player_profile.offline')}
+                    </>
+                  )}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1.5 text-xs sm:text-sm">
+                  <RefreshCw className="h-3 w-3" />
+                  {lastUpdatedText}
                 </Badge>
               </div>
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <RefreshProfileButton refreshInfo={props.data.refreshInfo} username={player.Username}/>
+            <RefreshProfileButton refreshInfo={props.data.refreshInfo} username={player.Username} />
             <FavouriteProfileButton RSN={player.Username} />
           </div>
         </div>

@@ -11,17 +11,15 @@ import {
 import PlayerNotFound from './not-found';
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
-  canRefresh,
   getDailyLevelIncreases,
   getDailyXpIncreases,
-  getFreshestData,
   getTrackedDaysByUsername,
   getWeeklyXpByDay,
 } from '~/~models/player.server';
-import { prisma } from '~/services/prisma.server';
+import { prisma } from '~/~services/prisma.server';
 import { sanitizeBigInts } from '~/lib/utils';
 import { PlayerData } from '~/~types/PlayerData';
-import { RuneMetrics, Runescape } from '~/services/runescape.server';
+import { RuneMetrics, Runescape } from '~/~services/runescape.server';
 import Header from './header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import OverviewTab from './tabs/overview';
@@ -30,6 +28,7 @@ import QuestsTab from './tabs/quests';
 import { useState, useRef, useEffect } from 'react';
 import { PlayerProfileSkeleton } from './skeleton';
 import { useTranslation } from 'react-i18next';
+import { PlayerDataFetcher } from '~/~models/data-fetcher.server';
 
 export const meta: MetaFunction = () => {
   const params = useParams();
@@ -40,8 +39,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
   if (!rsn) throw new Response('Missing RSN', { status: 400 });
 
-  const data = await getFreshestData(rsn);
-  if (typeof data === 'string') throw new Response(data, { status: 404 });
+  let fetcher = await PlayerDataFetcher.instance(rsn);
+  if (!fetcher)
+    throw new Response('Failed to fetch profile. Is this user private/non-existent?', {
+      status: 404,
+    });
+  const data = await fetcher.getFreshestData();
 
   const meta = await prisma.player.findUnique({
     where: {
@@ -56,7 +59,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     getDailyXpIncreases(rsn),
     getDailyLevelIncreases(rsn),
     getTrackedDaysByUsername(rsn),
-    canRefresh(rsn),
+    fetcher.getLastRefresh(),
   ]);
 
   const clanName = (await Runescape.getPlayerClanName(rsn)) ?? 'N/A';
