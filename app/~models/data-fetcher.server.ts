@@ -66,8 +66,9 @@ export class PlayerDataFetcher {
    * @returns {Promise<PlayerDataFetcher | undefined>} A new PlayerDataFetcher instance if the user exists; otherwise undefined.
    */
   public static async instance(username: string): Promise<PlayerDataFetcher | undefined> {
-    const exists = await Runescape.checkExistence([username]);
-    if (!exists) return;
+    // TODO cache user existence. fuck you jagex.
+    // const exists = await Runescape.checkExistence([username]);
+    // if (!exists) return;
     return new PlayerDataFetcher(username);
   }
   // #endregion
