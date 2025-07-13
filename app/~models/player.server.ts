@@ -6,14 +6,23 @@ import { IdMap, SkillCategories } from '~/~constants/Skills';
 import { PlayerData } from '~/~types/PlayerData';
 import { getWithinTimePeriod } from './snapshot.server';
 
+/**
+ * @deprecated
+ */
 function getRedisKey(username: string): string {
   return `rsn:lock:${username}`;
 }
 
+/**
+ * @deprecated
+ */
 function getCacheKey(username: string): string {
   return `rsn:fresh:${username}`;
 }
 
+/**
+ * @deprecated
+ */
 export async function canRefresh(
   username: string,
 ): Promise<{ refreshable: boolean; refreshable_at: Date | null }> {
@@ -49,6 +58,9 @@ export async function canRefresh(
   };
 }
 
+/**
+ * @deprecated
+ */
 export async function commitLock(username: string): Promise<void> {
   // set a lock key in redis with expiry to prevent concurrent refreshes
   await redis.set(getRedisKey(username), '1', {
@@ -56,6 +68,9 @@ export async function commitLock(username: string): Promise<void> {
   });
 }
 
+/**
+ * @deprecated
+ */
 export async function getFreshestData(username: string) {
   const cacheKey = getCacheKey(username);
 
