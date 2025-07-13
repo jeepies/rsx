@@ -51,6 +51,7 @@
       "refresh": "Refresh",
       "refreshing": "Refreshing...",
       "refresh_tooltip": "Refresh this players data",
+      "refreshable_in": "You can refresh in ",
       "refresh_success": "Successfully refreshed this players data",
       "refresh_failed": "Failed to refresh this players data. Please try again, or contact us on discord",
       "favourited": "Favourited",
