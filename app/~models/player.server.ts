@@ -147,8 +147,11 @@ export async function getTotalXpGainedByDay() {
   const day0Map = groupedByDateAndPlayer.get(day0Key) ?? new Map();
 
   let prevXpByPlayer = new Map<string, bigint>();
+  let seenPlayers = new Set<string>();
+
   for (const [playerId, snap] of day0Map) {
     prevXpByPlayer.set(playerId, snap.totalXp);
+    seenPlayers.add(playerId);
   }
 
   const results: { date: string; dailyXP: number }[] = [];
@@ -159,6 +162,13 @@ export async function getTotalXpGainedByDay() {
 
     for (const [playerId, snap] of currentMap) {
       const prev = prevXpByPlayer.get(playerId) ?? 0n;
+
+      if (!seenPlayers.has(playerId)) {
+        seenPlayers.add(playerId);
+        prevXpByPlayer.set(playerId, snap.totalXp);
+        continue;
+      }
+
       const gain = snap.totalXp - prev;
       if (gain > 0n) totalXp += gain;
       prevXpByPlayer.set(playerId, snap.totalXp);
@@ -337,25 +347,34 @@ export async function getTotalXpGainedLast24h() {
       select: {
         playerId: true,
         totalXp: true,
+        timestamp: true,
       },
     });
 
-    const byPlayer = new Map<string, { first: bigint; last: bigint }>();
+    const snapshotsByPlayer = new Map<string, { totalXp: bigint; timestamp: Date }[]>();
 
     for (const snap of snapshots) {
-      const xp = BigInt(snap.totalXp);
-
-      if (!byPlayer.has(snap.playerId)) {
-        byPlayer.set(snap.playerId, { first: xp, last: xp });
-      } else {
-        byPlayer.get(snap.playerId)!.last = xp;
+      if (!snapshotsByPlayer.has(snap.playerId)) {
+        snapshotsByPlayer.set(snap.playerId, []);
       }
+      snapshotsByPlayer.get(snap.playerId)!.push({
+        totalXp: BigInt(snap.totalXp),
+        timestamp: snap.timestamp,
+      });
     }
 
     let totalGain = 0n;
 
-    for (const { first, last } of byPlayer.values()) {
-      if (last > first) totalGain += last - first;
+    for (const snaps of snapshotsByPlayer.values()) {
+      if (snaps.length < 2) continue;
+
+      const filteredSnaps = snaps.slice(1);
+
+      if (filteredSnaps.length < 1) continue;
+
+      const xpGain = filteredSnaps[filteredSnaps.length - 1].totalXp - filteredSnaps[0].totalXp;
+
+      if (xpGain > 0n) totalGain += xpGain;
     }
 
     return totalGain;
