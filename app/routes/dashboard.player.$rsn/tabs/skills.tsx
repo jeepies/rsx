@@ -32,6 +32,9 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
   }));
   const levelsToday = Object.values(stats.dailyLevels).reduce((a, b) => a + b, 0);
   const xpToday = Object.values(stats.dailyXP).reduce((a, b) => a + b, 0);
+  const skillsLeftTo99 = player.Skills.Skills.filter((skill) => skill.Level < 99);
+  const skillsLeftTo120 = player.Skills.Skills.filter((skill) => skill.Level < 120);
+  const skillsAt120 = player.Skills.Skills.filter((skill) => skill.Level === 120);
 
   return (
     <>
@@ -80,6 +83,84 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center mb-3">
+              <div className="text-2xl font-bold text-orange-500">{skillsLeftTo99.length}</div>
+              <div className="text-sm text-muted-foreground">Skills Left to 99</div>
+            </div>
+            {skillsLeftTo99.length > 0 && (
+              <div className="space-y-1">
+                {skillsLeftTo99.slice(0, 3).map((skill) => (
+                  <div key={skill.JagexID} className="flex justify-between items-center text-xs">
+                    <span>{skill.HumanName}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {Number(skill.Level)}
+                    </Badge>
+                  </div>
+                ))}
+                {skillsLeftTo99.length > 3 && (
+                  <div className="text-xs text-muted-foreground text-center pt-1">
+                    +{skillsLeftTo99.length - 3} more
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center mb-3">
+              <div className="text-2xl font-bold text-blue-500">{skillsLeftTo120.length}</div>
+              <div className="text-sm text-muted-foreground">Skills Left to 120</div>
+            </div>
+            {skillsLeftTo120.length > 0 && (
+              <div className="space-y-1">
+                {skillsLeftTo120.slice(0, 3).map((skill) => (
+                  <div key={skill.JagexID} className="flex justify-between items-center text-xs">
+                    <span>{skill.HumanName}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {Number(skill.Level)}
+                    </Badge>
+                  </div>
+                ))}
+                {skillsLeftTo120.length > 3 && (
+                  <div className="text-xs text-muted-foreground text-center pt-1">
+                    +{skillsLeftTo120.length - 3} more
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center mb-3">
+              <div className="text-2xl font-bold text-purple-500">{skillsAt120.length}</div>
+              <div className="text-sm text-muted-foreground">Skills at 120</div>
+            </div>
+            {skillsAt120.length > 0 && (
+              <div className="space-y-1">
+                {skillsAt120.slice(0, 3).map((skill) => (
+                  <div key={skill.JagexID} className="flex justify-between items-center text-xs">
+                    <span>{skill.HumanName}</span>
+                    <Badge variant="default" className="text-xs bg-purple-500">
+                      120
+                    </Badge>
+                  </div>
+                ))}
+                {skillsAt120.length > 3 && (
+                  <div className="text-xs text-muted-foreground text-center pt-1">
+                    +{skillsAt120.length - 3} more
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -95,11 +176,21 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('pages.player_profile.tabs.skills.table.headers.skill')}</TableHead>
-                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.level')}</TableHead>
-                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.virtual')}</TableHead>
-                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.table.headers.experience')}</TableHead>
-                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.levels_today')}</TableHead>
-                <TableHead className="text-right">{t('pages.player_profile.tabs.skills.xp_today')}</TableHead>
+                <TableHead className="text-right">
+                  {t('pages.player_profile.tabs.skills.table.headers.level')}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t('pages.player_profile.tabs.skills.table.headers.virtual')}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t('pages.player_profile.tabs.skills.table.headers.experience')}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t('pages.player_profile.tabs.skills.levels_today')}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t('pages.player_profile.tabs.skills.xp_today')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
