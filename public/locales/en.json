@@ -226,6 +226,8 @@
             "advance": "Next"
           },
           "2": {
+            "shuffle_button": "Shuffle",
+            "fill_button": "Fill Empty",
             "advance": "Create"
           },
           "item_picker": {

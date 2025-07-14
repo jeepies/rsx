@@ -15,9 +15,11 @@ import {
 import { Switch } from '~/components/ui/switch';
 import { Tag, TagsInput } from '~/components/ui/tags-input';
 import { Drops, NormalizedDropsToDrops } from '~/~constants/Drops';
+import { Drop } from '~/~types/Drop';
 
 export interface CreateBingoModalProps {
   setter: Dispatch<SetStateAction<boolean>>;
+  drops: Drop[];
 }
 
 export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>) {
@@ -84,6 +86,47 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
       password += characters[randomIndex];
     }
     return password;
+  };
+
+  const findDropValue = (dropName: string) => {
+    console.log(dropName);
+    const item = props.drops.find((drop) => drop.drop_name === dropName);
+    return item;
+  };
+
+  const shufflePlacedItems = () => {
+    const placedEntries = Object.entries(items).filter(([_, v]) => v);
+    const values = placedEntries.map(([_, v]) => v);
+    const shuffled = [...values].sort(() => Math.random() - 0.5);
+
+    const newItems = { ...items };
+    placedEntries.forEach(([key], idx) => {
+      newItems[Number(key)] = shuffled[idx];
+    });
+
+    setItems(newItems);
+  };
+
+  const fillEmptySlots = () => {
+    const totalSlots = Number(gridSize) * Number(gridSize);
+    const usedValues = new Set(Object.values(items).filter(Boolean));
+    const availableValues = Drops.map((drop) =>
+      drop
+        .toLowerCase()
+        .replace(/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g, '')
+        .replace(/\s+/g, '_'),
+    ).filter((val) => !usedValues.has(val));
+
+    const newItems = { ...items };
+
+    for (let i = 0; i < totalSlots; i++) {
+      if (!newItems[i] && availableValues.length > 0) {
+        const index = Math.floor(Math.random() * availableValues.length);
+        newItems[i] = availableValues.splice(index, 1)[0];
+      }
+    }
+
+    setItems(newItems);
   };
 
   const renderStepOne = () => {
@@ -263,18 +306,32 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
               {Array.from({ length: Number(gridSize) * Number(gridSize) }).map((_, i) => (
                 <div
                   key={i}
-                  className="aspect-square p-2 text-xs border-2 rounded-lg flex flex-col items-center justify-center text-center transition-smooth border-muted-foreground/20 bg-muted/50 text-muted-foreground hover:bg-muted"
+                  className="aspect-square p-2 gap-2 text-xs border-2 rounded-lg flex flex-col items-center justify-center text-center transition-smooth border-muted-foreground/20 bg-muted/50 text-muted-foreground hover:bg-muted"
                   onClick={() => {
                     setEditingId(i);
                     setStep(-1);
                   }}
                 >
-                  {NormalizedDropsToDrops[items[i]]}
+                  {items[i] && (
+                    <img
+                      className="w-24 h-24"
+                      src={`/images/${findDropValue(NormalizedDropsToDrops[items[i]])?.image_filename}`}
+                      alt={items[i]}
+                    />
+                  )}
+                  <span className="font-bold text-md">{NormalizedDropsToDrops[items[i]]}</span>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* // TODO add ability to randomize grids after they've been placed */}
+          <div className="flex gap-2">
+            <Button variant="outline" className="w-full" onClick={shufflePlacedItems}>
+              {t(`${key}.step.${step}.shuffle_button`)}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={fillEmptySlots}>
+              {t(`${key}.step.${step}.fill_button`)}
+            </Button>
           </div>
 
           <Button className="w-full" disabled={!name || !description} onClick={() => setStep(3)}>
