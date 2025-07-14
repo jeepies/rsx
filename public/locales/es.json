@@ -217,6 +217,20 @@
           }
         }
       }
+    },
+    "players": {
+      "title": "Players",
+      "description": "Discover popular RuneScape players and their stats",
+      "total_level": "Total Level",
+      "most_searched": {
+        "title": "Most Searched Players (24h)",
+        "description": "Popular players that are frequently viewed by the community",
+        "profile_views": "Profile Views"
+      },
+      "top_players": {
+        "title": "Top Tracked Players",
+        "description": "Tracked players with the highest total level"
+      }
     }
   }
 }

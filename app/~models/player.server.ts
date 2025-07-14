@@ -690,3 +690,32 @@ export async function getMostViewedPlayers(limit: number = 8) {
 
   return result;
 }
+
+export async function getHighestTotalLevelPlayers(limit: number = 8) {
+  const players = await prisma.player.findMany({
+    include: {
+      snapshots: {
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: {
+          totalSkill: true,
+        },
+      },
+    },
+    take: 1000,
+  });
+
+  players.sort((a, b) => {
+    const aLevel = a.snapshots[0]?.totalSkill ?? 0n;
+    const bLevel = b.snapshots[0]?.totalSkill ?? 0n;
+    return Number(bLevel - aLevel);
+  });
+
+  const topPlayers = players.slice(0, limit);
+
+  return topPlayers.map((player) => ({
+    playerId: player.id,
+    username: player.username,
+    totalLevel: player.snapshots[0]?.totalSkill ?? null,
+  }));
+}
