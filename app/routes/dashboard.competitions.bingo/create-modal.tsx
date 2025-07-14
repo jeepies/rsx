@@ -89,7 +89,7 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
   };
 
   const findDropValue = (dropName: string) => {
-    console.log(dropName)
+    console.log(dropName);
     const item = props.drops.find((drop) => drop.drop_name === dropName);
     return item;
   };
@@ -271,7 +271,7 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
               {Array.from({ length: Number(gridSize) * Number(gridSize) }).map((_, i) => (
                 <div
                   key={i}
-                  className="aspect-square p-2 text-xs border-2 rounded-lg flex flex-col items-center justify-center text-center transition-smooth border-muted-foreground/20 bg-muted/50 text-muted-foreground hover:bg-muted"
+                  className="aspect-square p-2 gap-2 text-xs border-2 rounded-lg flex flex-col items-center justify-center text-center transition-smooth border-muted-foreground/20 bg-muted/50 text-muted-foreground hover:bg-muted"
                   onClick={() => {
                     setEditingId(i);
                     setStep(-1);
@@ -284,7 +284,7 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                       alt={items[i]}
                     />
                   )}
-                  {NormalizedDropsToDrops[items[i]]}
+                  <span className="font-bold text-md">{NormalizedDropsToDrops[items[i]]}</span>
                 </div>
               ))}
             </div>
