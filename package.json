@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
-    "dev": "remix vite:dev",
+    "dev": "concurrently \"npm:dev:remix\" \"npm:dev:worker\"",
+    "dev:remix": "remix vite:dev",
+    "dev:worker": "ts-node scripts/worker.ts",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "NODE_OPTIONS='--import ./instrumentation.server.mjs' remix-serve ./build/server/index.js",
     "format": "prettier --check .",
