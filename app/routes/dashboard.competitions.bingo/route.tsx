@@ -7,11 +7,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { formatDistance } from 'date-fns';
 import { Badge } from '~/components/ui/badge';
 import CreateBingoModal from './create-modal';
+import { LoaderFunctionArgs } from '@remix-run/node';
+import { getDropsWithUrls } from '~/lib/server/utils.server';
+import { useLoaderData } from '@remix-run/react';
+
+export async function loader() {
+  const drops = await getDropsWithUrls();
+  return { drops };
+}
 
 export default function XPCompetitions() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('active');
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const { drops } = useLoaderData<typeof loader>();
 
   const chatGPTBingo = [
     {
@@ -280,7 +289,7 @@ export default function XPCompetitions() {
           )}
         </TabsContent>
       </Tabs>
-      {createModalOpen && <CreateBingoModal setter={setCreateModalOpen} />}
+      {createModalOpen && <CreateBingoModal setter={setCreateModalOpen} drops={drops}/>}
     </div>
   );
 }

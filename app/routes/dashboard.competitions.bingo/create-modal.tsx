@@ -15,9 +15,11 @@ import {
 import { Switch } from '~/components/ui/switch';
 import { Tag, TagsInput } from '~/components/ui/tags-input';
 import { Drops, NormalizedDropsToDrops } from '~/~constants/Drops';
+import { Drop } from '~/~types/Drop';
 
 export interface CreateBingoModalProps {
   setter: Dispatch<SetStateAction<boolean>>;
+  drops: Drop[];
 }
 
 export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>) {
@@ -86,9 +88,10 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
     return password;
   };
 
-  const nameToImageURI = (item: string) => {
-    const name = (item ?? "").replaceAll(' ', '_') + '_detail.png';
-    return `https://runescape.wiki/images/${name}`;
+  const findDropValue = (dropName: string) => {
+    console.log(dropName)
+    const item = props.drops.find((drop) => drop.drop_name === dropName);
+    return item;
   };
 
   const renderStepOne = () => {
@@ -274,7 +277,13 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                     setStep(-1);
                   }}
                 >
-                  {items[i] !== "" && <img className='w-24 h-24' src={nameToImageURI(NormalizedDropsToDrops[items[i]])} alt={items[i]}/>}
+                  {items[i] && (
+                    <img
+                      className="w-24 h-24"
+                      src={`/images/${findDropValue(NormalizedDropsToDrops[items[i]])?.image_filename}`}
+                      alt={items[i]}
+                    />
+                  )}
                   {NormalizedDropsToDrops[items[i]]}
                 </div>
               ))}

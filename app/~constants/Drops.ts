@@ -11,7 +11,6 @@ export const Drops = [
   'Bandos chestplate',
   'Bandos boots',
   'Bandos helmet',
-  'Bandos shield',
   'Bandos hilt',
   'Bandos tassets',
   'Armadyl gloves',
@@ -26,7 +25,6 @@ export const Drops = [
   'Hood of Subjugation',
   'Gloves of Subjugation',
   'Garb of Subjugation',
-  'Want of Subjugation',
   'Ward of Subjugation',
   'Zamorak Hilt',
   'Divine Sigil',
@@ -81,7 +79,6 @@ export const Drops = [
   'Foot wraps of the First Necromancer',
   'spider Fang',
   'spider Eye',
-  'spider web',
   'Scripture of Wen',
   'Greater Concentrated Blast Ability Codex',
   "Kerapac's Wristwraps",
@@ -136,7 +133,6 @@ export const Drops = [
   'Orb of Corrupted Anima',
   'Orb of Pure Anima',
   'Fractured Armadyl Symbol',
-  'Fracted Stabilization Gem',
   "Staff of Armadyl's Fractured Shaft",
   'Codex of Lost Knowledge',
   'Shadow Spike',
@@ -174,7 +170,7 @@ export const Drops = [
   "Bottom of the Last Guardian's bow",
 ];
 
-function sanitizeString(input: string): string {
+export function sanitizeString(input: string): string {
   return input
     .toLowerCase()
     .replace(/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g, '')
