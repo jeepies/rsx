@@ -646,3 +646,76 @@ export async function getAllPlayers(): Promise<
     },
   });
 }
+
+export async function getMostViewedPlayers(limit: number = 8) {
+  const views = await prisma.playerView.groupBy({
+    by: ['playerId'],
+    _count: {
+      playerId: true,
+    },
+    orderBy: {
+      _count: {
+        playerId: 'desc',
+      },
+    },
+    take: limit,
+  });
+
+  const playerIds = views.map((v) => v.playerId);
+
+  const playersWithSnapshot = await prisma.player.findMany({
+    where: {
+      id: { in: playerIds },
+    },
+    include: {
+      snapshots: {
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: {
+          totalSkill: true,
+        },
+      },
+    },
+  });
+
+  const result = views.map((view) => {
+    const player = playersWithSnapshot.find((p) => p.id === view.playerId);
+    return {
+      playerId: view.playerId,
+      username: player?.username ?? 'Unknown',
+      viewCount: view._count.playerId,
+      totalLevel: player?.snapshots[0]?.totalSkill ?? null,
+    };
+  });
+
+  return result;
+}
+
+export async function getHighestTotalLevelPlayers(limit: number = 8) {
+  const players = await prisma.player.findMany({
+    include: {
+      snapshots: {
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: {
+          totalSkill: true,
+        },
+      },
+    },
+    take: 1000,
+  });
+
+  players.sort((a, b) => {
+    const aLevel = a.snapshots[0]?.totalSkill ?? 0n;
+    const bLevel = b.snapshots[0]?.totalSkill ?? 0n;
+    return Number(bLevel - aLevel);
+  });
+
+  const topPlayers = players.slice(0, limit);
+
+  return topPlayers.map((player) => ({
+    playerId: player.id,
+    username: player.username,
+    totalLevel: player.snapshots[0]?.totalSkill ?? null,
+  }));
+}

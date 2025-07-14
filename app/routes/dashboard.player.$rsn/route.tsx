@@ -36,7 +36,7 @@ export const meta: MetaFunction = () => {
   return [{ title: `${params.rsn} | RSX` }];
 };
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const rsn = params.rsn?.toLowerCase().trim();
   if (!rsn) throw new Response('Missing RSN', { status: 400 });
 
@@ -65,6 +65,35 @@ export async function loader({ params }: LoaderFunctionArgs) {
   ]);
 
   const clanName = (await Runescape.getPlayerClanName(rsn)) ?? 'N/A';
+
+  const ip =
+    request.headers.get('x-forwarded-for') ??
+    request.headers.get('cf-connecting-ip') ??
+    request.headers.get('x-real-ip') ??
+    'unknown';
+
+  if (ip !== 'unknown') {
+    const twentyFourHoursAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+
+    const recentView = await prisma.playerView.findFirst({
+      where: {
+        playerId: meta!.id,
+        ip,
+        viewedAt: {
+          gte: twentyFourHoursAgo,
+        },
+      },
+    });
+
+    if (!recentView) {
+      await prisma.playerView.create({
+        data: {
+          playerId: meta!.id,
+          ip,
+        },
+      });
+    }
+  }
 
   return {
     player,
