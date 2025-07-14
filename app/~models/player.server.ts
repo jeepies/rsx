@@ -646,3 +646,37 @@ export async function getAllPlayers(): Promise<
     },
   });
 }
+
+export async function getMostViewedProfiles(limit: number = 10) {
+  const views = await prisma.playerView.groupBy({
+    by: ['playerId'],
+    _count: {
+      playerId: true,
+    },
+    orderBy: {
+      _count: {
+        playerId: 'desc',
+      },
+    },
+    take: limit,
+  });
+
+  const playerIds = views.map((v) => v.playerId);
+
+  const players = await prisma.player.findMany({
+    where: {
+      id: { in: playerIds },
+    },
+  });
+
+  const result = views.map((view) => {
+    const player = players.find((p) => p.id === view.playerId);
+    return {
+      playerId: view.playerId,
+      username: player?.username ?? 'Unknown',
+      viewCount: view._count.playerId,
+    };
+  });
+
+  return result;
+}

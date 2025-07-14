@@ -1,3 +1,14 @@
+export async function loader({ request }: LoaderFunctionArgs) {
+  const uniqueViews = await prisma.playerView.count({
+    where: {
+      playerId: meta!.id,
+      viewedAt: {
+        gte: new Date(Date.now() - 1000 * 60 * 60 * 24),
+      },
+    },
+  });
+}
+
 export default function Players() {
   return (
     <div className="space-y-8">
