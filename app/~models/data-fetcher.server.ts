@@ -192,10 +192,10 @@ export class PlayerDataFetcher {
     const { Username, LoggedIn, Activities, Skills, Quests } = data;
 
     const player = await prisma.player.upsert({
-      where: { username: Username },
+      where: { username: Username.toLowerCase() },
       update: { lastFetchedAt: new Date() },
       create: {
-        username: Username,
+        username: Username.toLowerCase(),
         lastFetchedAt: new Date(),
       },
     });
