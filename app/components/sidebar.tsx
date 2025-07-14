@@ -11,7 +11,9 @@ import {
   Target,
   Trophy,
   Users,
+  Variable,
   Wrench,
+  X,
   Zap,
 } from 'lucide-react';
 import {
@@ -117,10 +119,10 @@ export default function DashboardSidebar() {
       <SidebarContent className="flex flex-col h-full">
         <div className="h-16 px-4 border-b border-sidebar-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">N</span>
-            </div>
-            {!collapsed && <span className="font-bold text-lg">Nexus</span>}
+            {collapsed && (
+              <span className="font-bold text-lg mr-2">X</span>
+            )}
+            {!collapsed && <span className="font-bold text-lg">RSX</span>}
           </div>
           {!collapsed && (
             <DropdownMenu>
