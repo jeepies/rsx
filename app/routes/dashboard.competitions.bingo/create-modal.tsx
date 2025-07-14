@@ -94,6 +94,41 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
     return item;
   };
 
+  const shufflePlacedItems = () => {
+    const placedEntries = Object.entries(items).filter(([_, v]) => v);
+    const values = placedEntries.map(([_, v]) => v);
+    const shuffled = [...values].sort(() => Math.random() - 0.5);
+
+    const newItems = { ...items };
+    placedEntries.forEach(([key], idx) => {
+      newItems[Number(key)] = shuffled[idx];
+    });
+
+    setItems(newItems);
+  };
+
+  const fillEmptySlots = () => {
+    const totalSlots = Number(gridSize) * Number(gridSize);
+    const usedValues = new Set(Object.values(items).filter(Boolean));
+    const availableValues = Drops.map((drop) =>
+      drop
+        .toLowerCase()
+        .replace(/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g, '')
+        .replace(/\s+/g, '_'),
+    ).filter((val) => !usedValues.has(val));
+
+    const newItems = { ...items };
+
+    for (let i = 0; i < totalSlots; i++) {
+      if (!newItems[i] && availableValues.length > 0) {
+        const index = Math.floor(Math.random() * availableValues.length);
+        newItems[i] = availableValues.splice(index, 1)[0];
+      }
+    }
+
+    setItems(newItems);
+  };
+
   const renderStepOne = () => {
     return (
       <>
@@ -288,8 +323,15 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* // TODO add ability to randomize grids after they've been placed */}
+          <div className="flex gap-2">
+            <Button variant="outline" className="w-full" onClick={shufflePlacedItems}>
+              {t(`${key}.step.${step}.shuffle_button`)}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={fillEmptySlots}>
+              {t(`${key}.step.${step}.fill_button`)}
+            </Button>
           </div>
 
           <Button className="w-full" disabled={!name || !description} onClick={() => setStep(3)}>

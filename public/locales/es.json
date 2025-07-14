@@ -175,7 +175,48 @@
         }
       },
       "participants": "participants",
-      "progress": "Progress"
+      "progress": "Progress",
+      "create_modal": {
+        "title": "Bingo Competition",
+        "description": "Create a new bingo competition",
+        "errors": {
+          "name_length": "Name must be between 1 and 18 characters",
+          "description_length": "Description must be between 1 and 28 characters",
+          "users_length": "There must be at least one user",
+          "invalid_grid": "Invalid grid size"
+        },
+        "step": {
+          "0": {
+            "name": "Name",
+            "name_placeholder": "Competition name...",
+            "description": "Description",
+            "description_placeholder": "A short description...",
+            "grid_size": "Grid Size",
+            "grid_size_placeholder": "Select a grid size...",
+            "users": "Users",
+            "users_placeholder": "Usernames separated by commas",
+            "advance": "Let's go!"
+          },
+          "1": {
+            "password": "Password",
+            "password_placeholder": "Password...",
+            "password_notice": "Leave blank for no password",
+            "generate": "Generate a password",
+            "joinable": "Joinable after creation",
+            "advance": "Next"
+          },
+          "2": {
+            "shuffle_button": "Shuffle",
+            "fill_button": "Fill Empty",
+            "advance": "Create"
+          },
+          "item_picker": {
+            "item": "Item",
+            "item_placeholder": "Select an item...",
+            "advance": "Save"
+          }
+        }
+      }
     }
   }
 }
