@@ -12,10 +12,21 @@ model Player {
   username String @unique
 
   snapshots PlayerSnapshot[]
+  views     PlayerView[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   lastFetchedAt DateTime @default(now())
+}
+
+model PlayerView {
+  id       String   @id @default(cuid())
+  playerId String
+  player   Player   @relation(fields: [playerId], references: [id])
+  ip       String
+  viewedAt DateTime @default(now())
+
+  @@index([playerId, ip, viewedAt])
 }
 
 model PlayerSnapshot {
