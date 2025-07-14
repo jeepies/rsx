@@ -144,6 +144,11 @@ export default function DashboardSidebar() {
           )}
         </div>
 
+        {!collapsed && (
+          <div className="px-4">
+            <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">DASHBOARD</p>
+          </div>
+        )}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -179,7 +184,7 @@ export default function DashboardSidebar() {
         </SidebarGroup>
 
         {!collapsed && (
-          <div className="px-4 py-2">
+          <div className="px-4">
             <div className="border-t border-sidebar-border"></div>
             <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">Tools</p>
           </div>
@@ -197,7 +202,7 @@ export default function DashboardSidebar() {
 
         {!collapsed && process.env.NODE_ENV === 'development' && (
           <>
-            <div className="px-4 py-2">
+            <div className="px-4">
               <div className="border-t border-sidebar-border"></div>
               <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">
                 DEVELOPMENT
