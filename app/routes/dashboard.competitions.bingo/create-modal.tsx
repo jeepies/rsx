@@ -89,7 +89,6 @@ export default function CreateBingoModal(props: Readonly<CreateBingoModalProps>)
   };
 
   const findDropValue = (dropName: string) => {
-    console.log(dropName);
     const item = props.drops.find((drop) => drop.drop_name === dropName);
     return item;
   };

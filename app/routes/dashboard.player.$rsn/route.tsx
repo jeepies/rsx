@@ -33,7 +33,7 @@ import { PlayerDataFetcher } from '~/~models/data-fetcher.server';
 
 export const meta: MetaFunction = () => {
   const params = useParams();
-  return [{ title: `${params.rsn} | Nexus` }];
+  return [{ title: `${params.rsn} | RSX` }];
 };
 
 export async function loader({ params }: LoaderFunctionArgs) {

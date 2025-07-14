@@ -1,4 +1,6 @@
+import { SkillName } from '@prisma/client';
 import config from '~/~services/config.server';
+import { prisma } from '~/~services/prisma.server';
 import redis from '~/~services/redis.server';
 import { RuneMetrics } from '~/~services/runescape.server';
 import { PlayerData } from '~/~types/PlayerData';
@@ -168,6 +170,7 @@ export class PlayerDataFetcher {
   private async fetchFreshData(): Promise<PlayerData> {
     const data = await RuneMetrics.getFullProfile(this.username);
     if (typeof data === 'string') throw new Error(data);
+    this.saveSnapshotToDatabase(data);
     return data;
   }
   // #endregion
@@ -181,6 +184,68 @@ export class PlayerDataFetcher {
    */
   public async getLastRefresh(): Promise<number> {
     return await this.getTimestamp(this.LAST_FETCH_KEY);
+  }
+  // #endregion
+
+  // #region Database
+  private async saveSnapshotToDatabase(data: PlayerData): Promise<void> {
+    const { Username, LoggedIn, Activities, Skills, Quests } = data;
+
+    const player = await prisma.player.upsert({
+      where: { username: Username.toLowerCase() },
+      update: { lastFetchedAt: new Date() },
+      create: {
+        username: Username.toLowerCase(),
+        lastFetchedAt: new Date(),
+      },
+    });
+
+    await prisma.playerSnapshot.create({
+      data: {
+        playerId: player.id,
+        timestamp: new Date(),
+
+        rank: parseInt(Skills.Rank, 10),
+        totalXp: BigInt(Skills.XP),
+        totalSkill: BigInt(Skills.Level),
+        combatLevel: BigInt(Skills.CombatLevel),
+        loggedIn: LoggedIn,
+
+        quests_completed: Quests.Completed,
+        quests_in_progress: Quests.InProgress,
+        quests_not_started: Quests.NotStarted,
+
+        skills: {
+          create: Skills.Skills.map((skill) => ({
+            name: skill.HumanName as SkillName,
+            xp: BigInt(skill.XP),
+            rank: BigInt(skill.Rank),
+            level: BigInt(skill.Level),
+          })),
+        },
+
+        quests: {
+          create: Quests.Quests.map((quest) => ({
+            title: quest.Title,
+            status: quest.Status,
+            difficulty: quest.Difficulty,
+            members: quest.Members,
+            questPoints: quest.QuestPoints,
+            userEligible: quest.Eligible,
+          })),
+        },
+
+        // activities: {
+        //   create: (Activities ?? []).map((activity) => ({
+        //     date: new Date(activity.Date),
+        //     details: activity.Details,
+        //     text: activity.Text,
+        //     token: activity.Token,
+        //     type: activity.Type,
+        //   })),
+        // },
+      },
+    });
   }
   // #endregion
 }

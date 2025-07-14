@@ -3,6 +3,7 @@ import { prisma } from '~/~services/prisma.server';
 import { SkillCategories } from '~/~constants/Skills';
 import { getWithinTimePeriod } from './snapshot.server';
 import { dropInitialSpike } from '~/lib/server/utils.server';
+import { Prisma } from '@prisma/client';
 
 export async function getWeeklyXpByDay(username: string) {
   const now = new Date();
@@ -633,4 +634,15 @@ export async function getPlayerStatus(
   if (daysSince < 15) return 'ONLINE';
   if (daysSince < 30) return 'OFFLINE';
   return 'INACTIVE';
+}
+
+export async function getAllPlayers(): Promise<
+  Prisma.PlayerGetPayload<{ include: { snapshots: true } }>[] | undefined
+> {
+  if (process.env.NODE_ENV !== 'development') return;
+  return await prisma.player.findMany({
+    include: {
+      snapshots: true,
+    },
+  });
 }

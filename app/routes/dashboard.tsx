@@ -8,7 +8,7 @@ import i18n from '../i18n';
 import { Toaster } from 'sonner';
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Nexus' }];
+  return [{ title: 'RSX' }];
 };
 
 export default function DashboardLayout() {
