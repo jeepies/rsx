@@ -7,7 +7,7 @@
     "build": "remix vite:build",
     "dev": "concurrently \"npm:dev:remix\" \"npm:dev:worker\"",
     "dev:remix": "remix vite:dev",
-    "dev:worker": "ts-node scripts/worker.ts",
+    "dev:worker": "tsx ./scripts/worker.ts",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "NODE_OPTIONS='--import ./instrumentation.server.mjs' remix-serve ./build/server/index.js",
     "format": "prettier --check .",
@@ -86,6 +86,7 @@
     "prisma": "6.11.1",
     "tailwindcss": "^3.4.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^6.0.0",
     "vite-tsconfig-paths": "^4.2.1"
