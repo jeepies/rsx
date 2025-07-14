@@ -11,6 +11,7 @@ import {
   Target,
   Trophy,
   Users,
+  Wrench,
   Zap,
 } from 'lucide-react';
 import {
@@ -191,6 +192,37 @@ export default function DashboardSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {!collapsed && process.env.NODE_ENV === 'development' && (
+          <div className="px-4 py-2">
+            <div className="border-t border-sidebar-border"></div>
+            <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">
+              DEVELOPMENT
+            </p>
+          </div>
+        )}
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to={'/dashboard/development'}
+                    className={`transition-smooth hover:bg-muted/50`}
+                    style={() => ({
+                      backgroundColor: 'transparent',
+                      color: 'inherit',
+                    })}
+                  >
+                    <Wrench className="mr-2 h-4 w-4" />
+                    {!collapsed && <span>Development</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <div className="mt-auto p-4 space-y-4">
@@ -212,7 +244,6 @@ export default function DashboardSidebar() {
                         onClick={() => handleFavouritesRedirect(f)}
                       >
                         <span>{f}</span>
-                        {/* <span></span> */}
                       </div>
                     ))
                   )}
