@@ -647,7 +647,7 @@ export async function getAllPlayers(): Promise<
   });
 }
 
-export async function getMostViewedProfiles(limit: number = 10) {
+export async function getMostViewedPlayers(limit: number = 8) {
   const views = await prisma.playerView.groupBy({
     by: ['playerId'],
     _count: {
@@ -663,18 +663,28 @@ export async function getMostViewedProfiles(limit: number = 10) {
 
   const playerIds = views.map((v) => v.playerId);
 
-  const players = await prisma.player.findMany({
+  const playersWithSnapshot = await prisma.player.findMany({
     where: {
       id: { in: playerIds },
+    },
+    include: {
+      snapshots: {
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: {
+          totalSkill: true,
+        },
+      },
     },
   });
 
   const result = views.map((view) => {
-    const player = players.find((p) => p.id === view.playerId);
+    const player = playersWithSnapshot.find((p) => p.id === view.playerId);
     return {
       playerId: view.playerId,
       username: player?.username ?? 'Unknown',
       viewCount: view._count.playerId,
+      totalLevel: player?.snapshots[0]?.totalSkill ?? null,
     };
   });
 
