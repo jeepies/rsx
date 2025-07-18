@@ -1,12 +1,8 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
-import { TooltipTrigger, TooltipContent } from '@radix-ui/react-tooltip';
-import { useFetcher } from '@remix-run/react';
 import { RefreshCw } from 'lucide-react';
 import FavouriteProfileButton from './favourite-button';
 import { Badge } from '~/components/ui/badge';
-import { Button } from '~/components/ui/button';
 import { Card, CardHeader } from '~/components/ui/card';
-import { Tooltip } from '~/components/ui/tooltip';
 import { PlayerData } from '~/~types/PlayerData';
 import { useTranslation } from 'react-i18next';
 import { formatDistance } from 'date-fns';
@@ -18,6 +14,7 @@ export interface HeaderComponentProps {
     refreshInfo: number;
     status: string;
   };
+    onSuccessfulRefresh?: () => void;
 }
 
 export default function Header(props: Readonly<HeaderComponentProps>) {
@@ -75,7 +72,7 @@ export default function Header(props: Readonly<HeaderComponentProps>) {
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <RefreshProfileButton refreshInfo={props.data.refreshInfo} username={player.Username} />
+            <RefreshProfileButton refreshInfo={props.data.refreshInfo} username={player.Username} onSuccessfulRefresh={props.onSuccessfulRefresh} />
             <FavouriteProfileButton RSN={player.Username} />
           </div>
         </div>

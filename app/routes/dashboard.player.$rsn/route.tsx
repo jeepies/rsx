@@ -3,9 +3,9 @@ import {
   isRouteErrorResponse,
   MetaFunction,
   useLoaderData,
-  useLocation,
   useNavigation,
   useParams,
+  useRevalidator,
   useRouteError,
 } from '@remix-run/react';
 import PlayerNotFound from './not-found';
@@ -117,6 +117,7 @@ export default function PlayerProfile() {
   const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
   const params = useParams();
+  const revalidator = useRevalidator();
   const navigation = useNavigation();
   const isLoading = navigation.state === 'loading';
   const isNavigatingToSamePlayerRoute =
@@ -149,7 +150,7 @@ export default function PlayerProfile() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <Header data={data} />
+      <Header data={data} onSuccessfulRefresh={() => revalidator.revalidate()} />
 
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 h-auto">
