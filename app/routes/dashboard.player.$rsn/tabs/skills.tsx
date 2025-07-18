@@ -33,7 +33,7 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
   const levelsToday = Object.values(stats.dailyLevels).reduce((a, b) => a + b, 0);
   const xpToday = Object.values(stats.dailyXP).reduce((a, b) => a + b, 0);
   const skillsLeftTo99 = player.Skills.Skills.filter((skill) => skill.Level < 99);
-  const skillsLeftTo120 = player.Skills.Skills.filter((skill) => skill.Level < 120);
+  const skillsLeftTo120 = player.Skills.Skills.filter((skill) => skill.Level < 120 && skill.Level >= 99);
   const skillsAt120 = player.Skills.Skills.filter((skill) => skill.Level === 120);
 
   return (
