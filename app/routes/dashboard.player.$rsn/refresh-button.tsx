@@ -11,6 +11,7 @@ import type { RefreshProfileResponse } from '~/~types/API';
 export interface RefreshProfileButtonProps {
   username: string;
   refreshInfo: number;
+  onSuccessfulRefresh?: () => void;
 }
 
 const MANUAL_REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
@@ -43,6 +44,7 @@ export default function RefreshProfileButton(props: Readonly<RefreshProfileButto
 
       if (fetcher.data.success) {
         toast.success(t('pages.player_profile.refresh_success'));
+        props.onSuccessfulRefresh?.();
       } else {
         toast.error(t('pages.player_profile.refresh_failed'));
       }
