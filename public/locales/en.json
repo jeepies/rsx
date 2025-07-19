@@ -175,6 +175,21 @@
           "name": "Completed",
           "error": "No Completed Competitions"
         }
+      },
+      "create_modal": {
+        "title": "XP Competition",
+        "description": "Create a new XP competition",
+        "step": {
+          "0": {
+            "name": "Name",
+            "name_placeholder": "Competition name...",
+            "description": "Description",
+            "description_placeholder": "A short description...",
+            "users": "Users",
+            "users_placeholder": "Usernames separated by commas",
+            "advance": "Let's go!"
+          }
+        }
       }
     },
     "bingo_competition": {
