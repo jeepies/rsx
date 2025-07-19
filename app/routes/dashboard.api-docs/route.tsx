@@ -1,7 +1,8 @@
-import { Database, LucideIcon, Shield, User } from 'lucide-react';
+import { ChevronDown, Database, LucideIcon, Shield, User } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 
 interface ApiEndpoint {
   method: string;
@@ -28,11 +29,57 @@ export default function ApiDocs() {
       endpoints: [
         {
           method: 'GET',
-          path: '/players/{username}',
+          path: '/player/{username}',
           description:
             'Get detailed player statistics including skills, combat level, and activity status.',
           methodColor: 'bg-green-500/10 text-green-600 border-green-200',
-          exampleResponse: `{}`,
+          exampleResponse: `
+{
+  "success": true,
+  "data": {
+    "Username": "Kelcei",
+    "LoggedIn": false,
+    "Skills": {
+      "Level": 2907,
+      "CombatLevel": 148,
+      "XP": 628539982,
+      "Rank": "122,374",
+      "Skills": [
+        {
+          "JagexID": 26,
+          "HumanName": "Invention",
+          "Level": 120,
+          "XP": 84738417,
+          "Rank": 102376
+        },
+        [...]
+      ],
+      "Activities": [
+        {
+          "date": "18-Jul-2025 19:21",
+          "details": "I killed 11 Powerful and imprisoned dinosaurs: Raksha, the Shadow Colossi.",
+          "text": "I killed 11 Rakshas."
+        },
+        [...]
+      ],
+      "Quests": {
+        "Completed": 198,
+        "InProgress": 6,
+        "NotStarted": 147,
+        "Quests": [
+          {
+            "Title": "A Christmas Reunion",
+            "Difficulty": 0,
+            "Status": "COMPLETED",
+            "Members": false,
+            "QuestPoints": 0,
+            "Eligible": true
+          },
+          [...]
+        ]
+    }
+  }
+}`,
         },
       ],
     },
@@ -60,7 +107,7 @@ export default function ApiDocs() {
             <CardDescription>All API requests should be made to:</CardDescription>
           </CardHeader>
           <CardContent>
-            <code className="bg-muted p-2 rounded text-sm block">https://rsx.lol/v1</code>
+            <code className="bg-muted p-2 rounded text-sm block">https://rsx.lol/api</code>
           </CardContent>
         </Card>
 
@@ -82,53 +129,73 @@ export default function ApiDocs() {
 
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Endpoints</h2>
-
+        
         {endpoints.map((section) => {
           const IconComponent = section.icon;
           return (
-            <Card key={section.title}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IconComponent className="h-5 w-5" />
-                  {section.title}
-                </CardTitle>
-                <CardDescription>{section.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {section.endpoints.map((endpoint, index) => (
-                  <div key={`${endpoint.method}-${endpoint.path}`}>
-                    {index > 0 && <Separator />}
-                    <div className="space-y-3">
+            <Collapsible key={section.title} defaultOpen>
+              <Card>
+                <CollapsibleTrigger className="w-full">
+                  <CardHeader className="hover:bg-muted/50 transition-colors">
+                    <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={endpoint.methodColor}>
-                          {endpoint.method}
-                        </Badge>
-                        <code className="text-sm">{endpoint.path}</code>
+                        <IconComponent className="h-5 w-5" />
+                        {section.title}
                       </div>
-                      <p className="text-sm text-muted-foreground ml-12">{endpoint.description}</p>
-
-                      {endpoint.exampleResponse && (
-                        <div className="ml-12 space-y-2">
-                          <h4 className="font-medium text-sm">Example Response:</h4>
-                          <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                            {endpoint.exampleResponse}
-                          </pre>
-                        </div>
-                      )}
-
-                      {endpoint.exampleCode && (
-                        <div className="ml-12 space-y-2">
-                          <h4 className="font-medium text-sm">Connection Example:</h4>
-                          <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                            {endpoint.exampleCode}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                      <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=closed]:-rotate-90" />
+                    </CardTitle>
+                    <CardDescription className="text-left">{section.description}</CardDescription>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    {section.endpoints.map((endpoint, index) => (
+                      <div key={`${endpoint.method}-${endpoint.path}`}>
+                        {index > 0 && <Separator />}
+                        <Collapsible>
+                          <CollapsibleTrigger className="w-full">
+                            <div className="flex items-center justify-between gap-2 p-2 hover:bg-muted/50 rounded transition-colors">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={endpoint.methodColor}>
+                                  {endpoint.method}
+                                </Badge>
+                                <code className="text-sm">{endpoint.path}</code>
+                              </div>
+                              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=closed]:-rotate-90" />
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="space-y-3 pt-2">
+                              <p className="text-sm text-muted-foreground ml-12">
+                                {endpoint.description}
+                              </p>
+                              
+                              {endpoint.exampleResponse && (
+                                <div className="ml-12 space-y-2">
+                                  <h4 className="font-medium text-sm">Example Response:</h4>
+                                  <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                                    {endpoint.exampleResponse}
+                                  </pre>
+                                </div>
+                              )}
+                              
+                              {endpoint.exampleCode && (
+                                <div className="ml-12 space-y-2">
+                                  <h4 className="font-medium text-sm">Connection Example:</h4>
+                                  <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                                    {endpoint.exampleCode}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    ))}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           );
         })}
       </div>
