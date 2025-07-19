@@ -15,6 +15,15 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    version: 'v0.4.2',
+    title: 'Charties',
+    date: new Date('2025-07-19T13:03:00Z'),
+    changes: [
+      { type: 'feature', description: 'Add custom Charties component' },
+      { type: 'improvement', description: 'Update pie chart on index to Charties' },
+    ],
+  },
+  {
     version: 'v0.4.1',
     title: 'Players rework',
     date: new Date('2025-07-19T00:56:00Z'),

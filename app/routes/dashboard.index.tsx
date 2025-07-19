@@ -22,6 +22,7 @@ import {
   getXpBySkillCategoryLast24h,
 } from '~/~models/player.server';
 import { useTranslation } from 'react-i18next';
+import Charties from '~/components/recharts';
 
 export async function loader() {
   const [weeklyDailyXPGain, dailyCategories, topEarners, totalPlayers, dailyTotalXP] =
@@ -148,7 +149,7 @@ export default function Index() {
             <CardDescription> {t('pages.home.skill_pie_chart.description')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <Charties data={data.dailyCategories}>
               <PieChart>
                 <Pie
                   data={data.dailyCategories}
@@ -173,7 +174,7 @@ export default function Index() {
                   contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                 />
               </PieChart>
-            </ResponsiveContainer>
+            </Charties>
           </CardContent>
         </Card>
       </div>
