@@ -719,3 +719,37 @@ export async function getHighestTotalLevelPlayers(limit: number = 8) {
     totalLevel: player.snapshots[0]?.totalSkill ?? null,
   }));
 }
+
+export async function getMostRecentlyUpdatedPlayers(limit = 5) {
+  const latestSnapshots = await prisma.playerSnapshot.findMany({
+    orderBy: { timestamp: 'desc' },
+    take: 100,
+    select: {
+      playerId: true,
+      timestamp: true,
+      totalSkill: true,
+      player: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  const seen = new Set<string>();
+  const uniqueSnapshots = [];
+
+  for (const snap of latestSnapshots) {
+    if (!seen.has(snap.playerId)) {
+      seen.add(snap.playerId);
+      uniqueSnapshots.push(snap);
+    }
+    if (uniqueSnapshots.length >= limit) break;
+  }
+
+  return uniqueSnapshots.map((snap) => ({
+    username: snap.player?.username ?? 'Unknown',
+    lastUpdated: snap.timestamp,
+    totalLevel: snap.totalSkill ?? null,
+  }));
+}
