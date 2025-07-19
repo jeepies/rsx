@@ -5,7 +5,7 @@ export type RefreshProfileResponse = {
 
 type SuccessResponse = {
   success: true;
-  message: string;
+  data: any;
 };
 
 type ErrorResponse = {
