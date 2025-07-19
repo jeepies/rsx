@@ -28,7 +28,7 @@ export default function ApiDocs() {
       endpoints: [
         {
           method: 'GET',
-          path: '/players/{username}',
+          path: '/player/{username}',
           description:
             'Get detailed player statistics including skills, combat level, and activity status.',
           methodColor: 'bg-green-500/10 text-green-600 border-green-200',
@@ -60,7 +60,7 @@ export default function ApiDocs() {
             <CardDescription>All API requests should be made to:</CardDescription>
           </CardHeader>
           <CardContent>
-            <code className="bg-muted p-2 rounded text-sm block">https://rsx.lol/v1</code>
+            <code className="bg-muted p-2 rounded text-sm block">https://rsx.lol/api</code>
           </CardContent>
         </Card>
 
