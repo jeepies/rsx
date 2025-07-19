@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import CreateXPModal from './create-modal';
 
 export default function XPCompetitions() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('active');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -18,7 +20,7 @@ export default function XPCompetitions() {
           </h1>
           <p className="text-muted-foreground mt-2">{t('pages.xp_competition.description')}</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => setCreateModalOpen(true)}>
           <Plus className="h-4 w-4" />
           {t('pages.xp_competition.create_competition')}
         </Button>
@@ -36,9 +38,7 @@ export default function XPCompetitions() {
         <TabsContent value="active" className="space-y-6">
           <div className="text-center py-12">
             <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">
-              {t('pages.xp_competition.tabs.completed.error')}
-            </h3>
+            <h3 className="text-lg font-semibold">{t('pages.xp_competition.tabs.active.error')}</h3>
             <p className="text-muted-foreground">{t('pages.xp_competition.check_back')}</p>
           </div>
         </TabsContent>
@@ -63,6 +63,7 @@ export default function XPCompetitions() {
           </div>
         </TabsContent>
       </Tabs>
+      {createModalOpen && <CreateXPModal setter={setCreateModalOpen} />}
     </div>
   );
 }
