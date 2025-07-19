@@ -10,10 +10,10 @@ export interface ChartiesProps {
 
 export default function Charties(props: Readonly<ChartiesProps>) {
   const { data, fallbackLabel = 'No data available', height = 300, children } = props;
-  const isEmpty = !data || data.length === 0;
+  const isEmpty = !data || data.length === 0 || data.filter(data => data.value !== 0).length === 0;
 
   return (
-    <div className="w-full flex items-center justify-center bg-white rounded-xl shadow-md">
+    <div className="w-full flex items-center justify-center" style={{ height }}>
       {isEmpty ? (
         <p className="text-muted-foreground text-lg">{fallbackLabel}</p>
       ) : (
