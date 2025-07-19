@@ -15,6 +15,15 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    version: 'v0.4.3',
+    title: 'API Documentation & Sidebar',
+    date: new Date('2025-07-19T15:10:00Z'),
+    changes: [
+      { type: 'feature', description: 'Added API documentation page' },
+      { type: 'feature', description: 'Added footer to sidebar' },
+    ],
+  },
+  {
     version: 'v0.4.2',
     title: 'Charties',
     date: new Date('2025-07-19T13:03:00Z'),
