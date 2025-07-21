@@ -7,10 +7,19 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
 import { Toaster } from 'sonner';
 
-export const meta: MetaFunction = () => {
-  return [{ title: 'RSX' }];
-};
-
+export const meta: MetaFunction = () => [
+  { title: 'RSX' },
+  { name: 'description', content: 'Your comprehensive Runescape 3 tracking and toolkit service' },
+  { name: 'viewport', content: 'width=device-width,initial-scale=1' },
+  { property: 'og:title', content: 'RSX' },
+  {
+    property: 'og:description',
+    content: 'Your comprehensive Runescape 3 tracking and toolkit service',
+  },
+  { property: 'og:type', content: 'website' },
+  { property: 'og:image', content: 'https://rsx.lol/logo.png' },
+  { property: 'og:url', content: 'https://rsx.lol' },
+];
 export default function DashboardLayout() {
   return (
     <>
