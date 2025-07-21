@@ -1,5 +1,15 @@
 FROM node:20
 
+ARG DATABASE_URL
+ARG REDIS_URL
+ARG NODE_ENV=production
+ARG PORT=80
+
+ENV DATABASE_URL=${DATABASE_URL}
+ENV REDIS_URL=${REDIS_URL}
+ENV NODE_ENV=${NODE_ENV}
+ENV PORT=${PORT}
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 ENV PNPM_HOME="/root/.local/share/pnpm"
@@ -21,5 +31,6 @@ RUN pnpm rebuild prisma && pnpm exec prisma generate
 
 RUN pnpm build
 
-EXPOSE 80
+EXPOSE ${PORT}
+
 CMD ["pm2-runtime", "ecosystem.config.js"]
