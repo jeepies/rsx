@@ -251,6 +251,11 @@
       "recent_players": {
         "title": "Recently Updated",
         "description": "Players who were updated recently"
+      },
+      "top_players": {
+        "title": "Top Players",
+        "description": "Tracked players, sorted by total level",
+        "level": "Level"
       }
     }
   }

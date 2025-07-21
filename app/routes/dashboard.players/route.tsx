@@ -7,12 +7,13 @@ import {
 } from '~/~models/player.server';
 import HallOfFame from './hall-of-fame';
 import RecentPlayers from './recent-players';
+import TopPlayers from './top-players';
 
 export async function loader() {
   const [mostViewed, topPlayers, recentlyUpdated] = await Promise.all([
     getMostViewedPlayers(5),
-    getHighestTotalLevelPlayers(),
-    getMostRecentlyUpdatedPlayers(),
+    getHighestTotalLevelPlayers(10),
+    getMostRecentlyUpdatedPlayers(5),
   ]);
 
   return {
@@ -37,6 +38,8 @@ export default function Players() {
         <HallOfFame mostViewed={mostViewed} />
         <RecentPlayers recentlyActive={recentlyUpdated} />
       </div>
+
+      <TopPlayers topPlayers={topPlayers} />
     </div>
   );
 }
