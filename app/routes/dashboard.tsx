@@ -16,6 +16,7 @@ export const meta: MetaFunction = () => [
     property: 'og:description',
     content: 'Your comprehensive Runescape 3 tracking and toolkit service',
   },
+  { name: 'theme-color', content: '#a29bf4' },
   { property: 'og:type', content: 'website' },
   { property: 'og:image', content: 'https://rsx.lol/logo.png' },
   { property: 'og:url', content: 'https://rsx.lol' },

@@ -12,6 +12,7 @@ export const meta: MetaFunction = () => [
   { property: 'og:type', content: 'website' },
   { property: 'og:image', content: 'https://rsx.lol/logo.png' },
   { property: 'og:url', content: 'https://rsx.lol' },
+  { name: 'theme-color', content: '#a29bf4' },
 ];
 
 export async function loader() {
