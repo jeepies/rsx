@@ -131,11 +131,7 @@ export default function PlayerProfile() {
   const revalidator = useRevalidator();
   const navigation = useNavigation();
   const isLoading = navigation.state === 'loading';
-  const isNavigatingToSamePlayerRoute =
-    navigation.location?.pathname.startsWith('/player/') &&
-    params.rsn &&
-    navigation.location.pathname.toLowerCase().includes(params.rsn.toLowerCase());
-  const shouldShowSkeletonLoading = isLoading && isNavigatingToSamePlayerRoute;
+
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -148,8 +144,9 @@ export default function PlayerProfile() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [shouldShowSkeletonLoading]);
-  const showSkeleton = shouldShowSkeletonLoading || !minTimeElapsed || !data;
+  }, [isLoading]);
+
+  const showSkeleton = isLoading || !minTimeElapsed || !data;
 
   if (showSkeleton) {
     return <PlayerProfileSkeleton />;
