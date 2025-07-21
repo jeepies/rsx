@@ -27,8 +27,6 @@ RUN pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
 COPY . .
 
-COPY .env.production .env
-
 RUN pnpm rebuild prisma && pnpm exec prisma generate
 
 RUN pnpm build
