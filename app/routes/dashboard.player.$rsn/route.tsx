@@ -33,7 +33,22 @@ import { PlayerDataFetcher } from '~/~models/data-fetcher.server';
 
 export const meta: MetaFunction = () => {
   const params = useParams();
-  return [{ title: `${params.rsn} | RSX` }];
+  const rsn = params.rsn ?? 'Player';
+  return [
+    { title: `${rsn} | RSX` },
+    {
+      name: 'description',
+      content: `View ${rsn}'s Runescape 3 stats, progress, and profile on RSX.`,
+    },
+    { property: 'og:title', content: `${rsn} | RSX` },
+    {
+      property: 'og:description',
+      content: `View ${rsn}'s Runescape 3 stats, progress, and profile on RSX.`,
+    },
+    { property: 'og:type', content: 'profile' },
+    { property: 'og:image', content: 'https://rsx.lol/logo.png' },
+    { property: 'og:url', content: 'https://rsx.lol' },
+  ];
 };
 
 export async function loader({ request, params }: LoaderFunctionArgs) {

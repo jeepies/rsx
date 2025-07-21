@@ -30,8 +30,8 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
       xp: stats.dailyXP[s.HumanName],
     },
   }));
-  const levelsToday = Object.values(stats.dailyLevels).reduce((a, b) => a + b, 0);
-  const xpToday = Object.values(stats.dailyXP).reduce((a, b) => a + b, 0);
+  const levelsToday = Object.values(stats.dailyLevels).reduce((a, b) => Number(a) + Number(b), 0)
+  const xpToday = Object.values(stats.dailyXP).reduce((a, b) => Number(a) + Number(b), 0);
   const skillsLeftTo99 = player.Skills.Skills.filter((skill) => skill.Level < 99);
   const skillsLeftTo120 = player.Skills.Skills.filter((skill) => skill.Level < 120 && skill.Level >= 99);
   const skillsAt120 = player.Skills.Skills.filter((skill) => skill.Level === 120);
@@ -62,7 +62,7 @@ export default function SkillTab(props: Readonly<SkillsTabProps>) {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{levelsToday}</div>
+              <div className="text-2xl font-bold text-primary">{String(levelsToday)}</div>
               <div className="text-sm text-muted-foreground">
                 {t('pages.player_profile.tabs.skills.levels_today')}
               </div>
