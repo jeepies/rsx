@@ -248,9 +248,9 @@
         "fallback": "Its lonely here...",
         "level": "Level"
       },
-      "top_players": {
-        "title": "Top Tracked Players",
-        "description": "Tracked players with the highest total level"
+      "recent_players": {
+        "title": "Recently Updated",
+        "description": "Players who were updated recently"
       }
     }
   }
