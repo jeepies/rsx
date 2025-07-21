@@ -1,7 +1,5 @@
 import { useLoaderData, useNavigate } from '@remix-run/react';
-import { Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 import {
   getHighestTotalLevelPlayers,
   getMostRecentlyUpdatedPlayers,
@@ -24,14 +22,9 @@ export async function loader() {
   };
 }
 
-{
-  /* TODO add translation */
-}
-
 export default function Players() {
   const { mostViewed, topPlayers, recentlyUpdated } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-8">
@@ -42,7 +35,7 @@ export default function Players() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <HallOfFame mostViewed={mostViewed} />
-        <RecentPlayers recentlyActive={recentlyUpdated}/>
+        <RecentPlayers recentlyActive={recentlyUpdated} />
       </div>
     </div>
   );

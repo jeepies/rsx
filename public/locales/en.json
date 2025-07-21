@@ -242,10 +242,11 @@
       "title": "Players",
       "description": "Discover popular RuneScape players and their stats",
       "total_level": "Total Level",
-      "most_searched": {
-        "title": "Most Searched Players (24h)",
-        "description": "Popular players that are frequently viewed by the community",
-        "profile_views": "Profile Views"
+      "hall_of_fame": {
+        "title": "Hall of Fame",
+        "description": "Players that are frequently viewed by the community",
+        "fallback": "Its lonely here...",
+        "level": "Level"
       },
       "top_players": {
         "title": "Top Tracked Players",
