@@ -2,7 +2,7 @@ import { SkillName } from '@prisma/client';
 import config from '~/~services/config.server';
 import { prisma } from '~/~services/prisma.server';
 import redis from '~/~services/redis.server';
-import { RuneMetrics } from '~/~services/runescape.server';
+import { RuneMetrics, Runescape } from '~/~services/runescape.server';
 import { PlayerData } from '~/~types/PlayerData';
 
 export class PlayerDataFetcher {
@@ -67,9 +67,26 @@ export class PlayerDataFetcher {
    * @returns {Promise<PlayerDataFetcher | undefined>} A new PlayerDataFetcher instance if the user exists; otherwise undefined.
    */
   public static async instance(username: string): Promise<PlayerDataFetcher | undefined> {
-    // TODO cache user existence. fuck you jagex.
-    // const exists = await Runescape.checkExistence([username]);
-    // if (!exists) return;
+    const dbUser = await prisma.player.findUnique({
+      where: { username: username.toLowerCase() },
+    });
+
+    if (dbUser) {
+      return new PlayerDataFetcher(username);
+    }
+
+    // If not in DB, check existence in RuneScape
+    const exists = await Runescape.checkExistence([username]);
+    if (!exists?.get(username.toLowerCase())) return;
+
+    // Create user in DB
+    await prisma.player.create({
+      data: {
+        username: username.toLowerCase(),
+        lastFetchedAt: new Date(),
+      },
+    });
+
     return new PlayerDataFetcher(username);
   }
   // #endregion
