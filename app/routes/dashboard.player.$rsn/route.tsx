@@ -40,7 +40,7 @@ export const meta: MetaFunction = ({ data }) => {
     { name: 'description', content: `View ${rsn}'s Runescape 3 stats, progress, and profile on RSX.` },
     { name: 'theme-color', content: '#a29bf4' },
     { property: 'og:title', content: `${rsn} | RSX` },
-    { property: 'og:description', content: `View ${rsn}'s Runescape 3 stats, progress, and profile on RSX.` },
+    { property: 'og:description', content: `View ${rsn}'s Runescape 3 stats, progress, and profile on RSX.\n\`\`\`test\`\`\`` },
     { property: 'og:type', content: 'profile' },
     { property: 'og:image', content: `https://secure.runescape.com/m=avatar-rs/${rsn}/chat.png` },
     { property: 'og:url', content: `https://rsx.lol/dashboard/player/${encodeURIComponent(rsn)}` },
