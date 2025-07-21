@@ -12,7 +12,7 @@ import RecentPlayers from './recent-players';
 
 export async function loader() {
   const [mostViewed, topPlayers, recentlyUpdated] = await Promise.all([
-    getMostViewedPlayers(),
+    getMostViewedPlayers(5),
     getHighestTotalLevelPlayers(),
     getMostRecentlyUpdatedPlayers(),
   ]);
