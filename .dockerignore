@@ -1,0 +1,20 @@
+# Ignore dependencies
+node_modules
+.pnpm
+
+# Ignore git & build files
+.git
+.gitignore
+Dockerfile
+docker-compose*.yml
+
+# Ignore environment files
+.env
+.env.*
+secrets/
+
+# Ignore logs
+*.log
+
+# Ignore OS files
+.DS_Store
