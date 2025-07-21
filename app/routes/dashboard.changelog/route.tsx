@@ -15,6 +15,16 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    version: 'v0.4.4',
+    title: 'Players, again.',
+    date: new Date('2025-07-21T19:06:00Z'),
+    changes: [
+      { type: 'fix', description: 'Add limit of 5 to hall of fame' },
+      { type: 'improvement', description: 'Fixed i18n compatibility' },
+      { type: 'feature', description: 'Added top players card' },
+    ],
+  },
+  {
     version: 'v0.4.3',
     title: 'API Documentation & Sidebar',
     date: new Date('2025-07-19T15:10:00Z'),

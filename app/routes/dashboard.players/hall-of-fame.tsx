@@ -1,5 +1,6 @@
 import { useNavigate } from '@remix-run/react';
 import { Crown, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 
 export interface HallOfFameProps {
@@ -14,21 +15,24 @@ export interface HallOfFameProps {
 export default function HallOfFame(props: Readonly<HallOfFameProps>) {
   const { mostViewed } = props;
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const key = "pages.players.hall_of_fame"
 
   return (
     <Card className="animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-primary" />
-          Hall of Fame
+          {t(`${key}.title`)}
         </CardTitle>
-        <CardDescription>Most viewed players of all time</CardDescription>
+        <CardDescription>{t(`${key}.description`)}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {mostViewed.length === 0 ? (
             <div className="flex items-center justify-center h-40">
-              <p className="text-muted-foreground text-xl">Its lonely here...</p>
+              <p className="text-muted-foreground text-xl">{t(`${key}.fallback`)}</p>
             </div>
           ) : (
             mostViewed.map((player, index) => (
@@ -50,7 +54,7 @@ export default function HallOfFame(props: Readonly<HallOfFameProps>) {
                     <Eye className="h-3 w-3" />
                     {player.viewCount}
                   </div>
-                  <p className="text-xs text-muted-foreground">Level {Number(player.totalLevel)}</p>
+                  <p className="text-xs text-muted-foreground">{t(`${key}.level`)} {Number(player.totalLevel)}</p>
                 </div>
               </div>
             ))

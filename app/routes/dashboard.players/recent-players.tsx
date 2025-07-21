@@ -1,6 +1,7 @@
 import { useNavigate } from '@remix-run/react';
 import { formatDistance } from 'date-fns';
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 
 export interface RecentPlayersProps {
@@ -14,18 +15,20 @@ export interface RecentPlayersProps {
 export default function RecentPlayers(props: Readonly<RecentPlayersProps>) {
   const { recentlyActive } = props;
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const key = "pages.players.recent_players";
 
   const now = new Date();
-
 
   return (
     <Card className="animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          Recently Active
+          {t(`${key}.title`)}
         </CardTitle>
-        <CardDescription>Players who were active recently</CardDescription>
+        <CardDescription>{t(`${key}.description`)}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
