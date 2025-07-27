@@ -11,14 +11,16 @@
   },
   "topbar": {
     "search_placeholder": "Buscar jugador...",
-    "recent_searches": "Búsquedas recientes"
+    "recent_searches": "Búsquedas recientes",
+    "favourites": "Favoritos",
+    "no_favourites": "You have no favourite players yet"
   },
   "sidebar": {
     "home": "Página Principal",
     "players": "Jugadores",
     "clans": "Clans",
     "leaderboards": "Clasificación",
-    "favourites": "Favoritos",
+
     "competitions": "Competiciones",
     "xp_competition": "Competiciones de XP",
     "bingo": "Bingo",
