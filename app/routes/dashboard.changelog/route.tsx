@@ -15,6 +15,16 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    version: 'v0.4.5',
+    title: 'Topbar :3',
+    date: new Date('2025-07-27T03:16:00Z'),
+    changes: [
+      { type: 'improvement', description: 'Change favourites to topbar dropdown' },
+      { type: 'improvement', description: 'Fixed i18n compatibility' },
+      { type: 'improvement', description: 'Fixed padding' },
+    ],
+  },
+  {
     version: 'v0.4.4',
     title: 'Players, again.',
     date: new Date('2025-07-21T19:06:00Z'),
