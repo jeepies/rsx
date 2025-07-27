@@ -78,12 +78,12 @@ export default function DashboardTopbar() {
               placeholder={t('topbar.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyUp={handleKeyPress}
               onFocus={() => setShowRecentSearches(true)}
-              className="w-96 pr-10 transition-smooth focus:w-[28rem]"
+              className="w-96 pr-14 transition-smooth focus:w-[28rem]"
             />
             <Button size="sm" onClick={() => handleSearch()} className="absolute right-1 h-7 px-2">
-              <Search className="h-3 w-3" />
+              <Search className="h-1 w-1" />
             </Button>
           </div>
 
