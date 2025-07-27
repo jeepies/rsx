@@ -35,9 +35,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { Button } from '~/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { NavLink, useNavigate } from '@remix-run/react';
-import { Card, CardContent } from './ui/card';
-import { useFavourites } from '~/~contexts/favourites';
+import { NavLink } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
@@ -45,8 +43,6 @@ export default function DashboardSidebar() {
   const { t, i18n } = useTranslation();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const navigate = useNavigate();
-  const { favourites } = useFavourites();
   const [competitionsOpen, setCompetitionsOpen] = useState(false);
 
   const mainNavItems = [
@@ -86,8 +82,6 @@ export default function DashboardSidebar() {
       icon: Target,
     },
   ];
-
-  const handleFavouritesRedirect = (RSN: string) => navigate(`/dashboard/player/${RSN}`);
 
   const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
     const IconComponent =
@@ -233,35 +227,6 @@ export default function DashboardSidebar() {
           </>
         )}
       </SidebarContent>
-
-      <div className="mt-auto p-4 space-y-4">
-        {!collapsed && (
-          <>
-            <Card>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Heart className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{t('sidebar.favourites')}</span>
-                </div>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  {favourites.length === 0 ? (
-                    <>No favourites yet</>
-                  ) : (
-                    favourites.map((f) => (
-                      <div
-                        className="flex justify-between cursor-pointer hover:text-primary transition"
-                        onClick={() => handleFavouritesRedirect(f)}
-                      >
-                        <span>{f}</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div>
 
       <div className="border-t border-sidebar-border bg-gradient-to-r from-muted/20 to-muted/40 p-3">
         <TooltipProvider>
