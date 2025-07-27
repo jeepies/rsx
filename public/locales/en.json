@@ -11,14 +11,16 @@
   },
   "topbar": {
     "search_placeholder": "Search for a player...",
-    "recent_searches": "Recent Searches"
+    "recent_searches": "Recent Searches",
+    "favourites": "Favourites",
+    "no_favourites": "It's lonely here...",
+    "no_favourites_message": "Add players to your favourites to see them here"
   },
   "sidebar": {
     "home": "Home",
     "players": "Players",
     "clans": "Clans",
     "leaderboards": "Leaderboards",
-    "favourites": "Favourites",
     "competitions": "Competitions",
     "xp_competition": "XP Competition",
     "bingo": "Bingo",
